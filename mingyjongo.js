@@ -137,8 +137,7 @@ var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
            }
          })
          .then(function(response){
-           var gameName = response.data.data.game.data.names.international;
-           var catName = response.data.data.category.data.name;
+           var catName = response.data.data.game.data.names.international + ' ' + response.data.data.category.data.name;
            var userName = response.data.data.players.data[0];
            if(userName.names === undefined){
              userName = userName.name;
@@ -154,7 +153,12 @@ var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
                timeStr = timeStr + '0';
              }
            }
-           PBChan.send('Bzzarrgh! ' + userName + ' got a ' + timeStr + time.minutes + ':' + time.minutes + ' in ' + gameName + catName + '! I  calculate my chances of stopping them are now minimal...');
+           timeStr = timeStr + time.minutes + ':';
+           if(time.seconds < 10){
+               timeStr = timeStr + '0';
+           }
+           timeStr = timeStr + time.seconds;
+           PBChan.send('Bzzarrgh! ' + userName + ' got a ' + timeStr + ' in '+ catName + '! I calculate my chances of stopping them are now minimal...');
          })
          .catch(console.error);
        }
