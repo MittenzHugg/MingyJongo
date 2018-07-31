@@ -19,6 +19,8 @@ var speedrun_com = axios.create({
 
 var config = require('./config.json');
 
+const PB_text = require('./PBTexts.json');
+
 var PBChan = {};
 
 var supportedGames = [
@@ -69,7 +71,7 @@ client.on('message', (message) => {
       /*
     case "fake": 
         var gameIndex = 0;
-        axios.get(https://www.speedrun.com/run/z13w58gm,{
+        axios.get('https://www.speedrun.com/api/v1/runs/z13w58gm',{
           params:{
             embed: 'game,category,players'
           }
@@ -96,17 +98,17 @@ client.on('message', (message) => {
             timeStr = timeStr + '0';
           }
           timeStr = timeStr + time.seconds;
+          stringIndex = Math.floor(Math.random()*(PB_text.data.length +1 ));
           var embed = new Discord.RichEmbed()
-            .setAuthor("Mingy Jongo","https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png")
+            .setAuthor(PB_text.data[stringIndex].author.name,PB_text.data[stringIndex].author.image)
             .setTitle(response.data.data.weblink)
-            .setDescription("Bzzarrgh!")
-            .addField(`${userName} got a ${timeStr} in ${catName}!`,"I calculate my chances of stopping them are now minimal...");
+            .setDescription(PB_text.data[stringIndex].description)
+            .addField(`${userName} got a ${timeStr} in ${catName}!`,PB_text.data[stringIndex].field.description);
             //.setThumbnail(response.data.data.videos.links[0].uri);
           PBChan.send({embed});
         })
         .catch(console.error);
-      break;
-      */
+      break;*/
     default:
       break;
   }
