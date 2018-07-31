@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 //sensitive data(i.e. oauth tokens)
 const sensitive = require('./sensitive.json');
 
@@ -15,6 +17,7 @@ var speedrun_com = axios.create({
   baseURL: 'https://www.speedrun.com/api/v1'
 });
 
+var config = require('./config.json');
 
 var PBChan = {};
 
@@ -28,7 +31,7 @@ var supportedGames = [
 //DISCORD
 client.on('ready', () => {
   //find last verified runs
-  PBChan = client.channels.find('name','community-pbs');
+  PBChan = client.channels.find('name',config.discord.PB_channel.name);
   for (var i = 0; i < supportedGames.length; i++){
     speedrun_com.get('/runs',{
       params:{
@@ -55,8 +58,57 @@ const prefix = '!'
 client.on('message', (message) => {
   if(!message.content.startsWith(prefix) || message.author.bot) return;
 
-  if(message.content.startsWith(prefix + 'ping')){
-    message.channel.send('pong!');
+  //seperate command from argument array
+  const args = message.content.slice(prefix.length).trim().split(/ +/g);
+  const command = args.shift().toLowerCase(); 
+    
+  switch(command){
+    case "ping":
+      message.channel.send('pong!');
+      break;
+      /*
+    case "fake": 
+        var gameIndex = 0;
+        axios.get(https://www.speedrun.com/run/z13w58gm,{
+          params:{
+            embed: 'game,category,players'
+          }
+        })
+        .then(function(response){
+          var catName = response.data.data.game.data.names.international + ' ' + response.data.data.category.data.name;
+          var userName = response.data.data.players.data[0];
+          if(userName.names === undefined){
+            userName = userName.name;
+          }
+          else{
+            userName = userName.names.international;
+          }
+          var time =  moment.duration(response.data.data.times.primary)._data;
+          var timeStr = '';
+          if(time.hours != 0){
+            timeStr = timeStr + time.hours + ':';
+            if(time.minutes < 10){
+              timeStr = timeStr + '0';
+            }
+          }
+          timeStr = timeStr + time.minutes + ':';
+          if(time.seconds < 10){
+            timeStr = timeStr + '0';
+          }
+          timeStr = timeStr + time.seconds;
+          var embed = new Discord.RichEmbed()
+            .setAuthor("Mingy Jongo","https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png")
+            .setTitle(response.data.data.weblink)
+            .setDescription("Bzzarrgh!")
+            .addField(`${userName} got a ${timeStr} in ${catName}!`,"I calculate my chances of stopping them are now minimal...");
+            //.setThumbnail(response.data.data.videos.links[0].uri);
+          PBChan.send({embed});
+        })
+        .catch(console.error);
+      break;
+      */
+    default:
+      break;
   }
 });
 
@@ -158,7 +210,13 @@ var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
                timeStr = timeStr + '0';
            }
            timeStr = timeStr + time.seconds;
-           PBChan.send('Bzzarrgh! ' + userName + ' got a ' + timeStr + ' in '+ catName + '! I calculate my chances of stopping them are now minimal...');
+           var embed = new Discord.RichEmbed()
+            .setAuthor("Mingy Jongo","https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png")
+            .setTitle(response.data.data.weblink)
+            .setDescription("Bzzarrgh!")
+            .addField(`${userName} got a ${timeStr} in ${catName}!`,"I calculate my chances of stopping them are now minimal...");
+            //.setThumbnail(response.data.data.videos.links[0].uri);
+          PBChan.send({embed});
          })
          .catch(console.error);
        }

@@ -1,0 +1,8 @@
+{
+    "prefix":"!",
+    "discord":{
+       "PB_channel":{
+           "name":"community-pbs"
+       }  
+    }
+}
