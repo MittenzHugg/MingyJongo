@@ -115,7 +115,7 @@ client.on('message', (message) => {
 });
 
 //NOTIFY BK MOD TO CHECK SR.COM
-var bk_mod_reminder = schedule.scheduleJob('20 * * *', function(){
+var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
   console.log('Checking for runs to verify');
   speedrun_com.get('/runs', {
     params: {
