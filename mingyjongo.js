@@ -212,11 +212,12 @@ var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
                timeStr = timeStr + '0';
            }
            timeStr = timeStr + time.seconds;
-           var embed = new Discord.RichEmbed()
-            .setAuthor("Mingy Jongo","https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png")
+           stringIndex = Math.floor(Math.random()*(PB_text.data.length +1 ));
+          var embed = new Discord.RichEmbed()
+            .setAuthor(PB_text.data[stringIndex].author.name,PB_text.data[stringIndex].author.image)
             .setTitle(response.data.data.weblink)
-            .setDescription("Bzzarrgh!")
-            .addField(`${userName} got a ${timeStr} in ${catName}!`,"I calculate my chances of stopping them are now minimal...");
+            .setDescription(PB_text.data[stringIndex].description)
+            .addField(`${userName} got a ${timeStr} in ${catName}!`,PB_text.data[stringIndex].field.description);
             //.setThumbnail(response.data.data.videos.links[0].uri);
           PBChan.send({embed});
          })
