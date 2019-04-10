@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
 
 //sensitive data(i.e. oauth tokens)
@@ -115,6 +117,7 @@ client.on('message', (message) => {
 });
 
 //NOTIFY BK MOD TO CHECK SR.COM
+/*
 var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
   console.log('Checking for runs to verify');
   speedrun_com.get('/runs', {
@@ -161,6 +164,7 @@ var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
   })
   .catch(console.error);
 });
+*/
 
 //CHECK SR.COM FOR NEW PB's
 var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
