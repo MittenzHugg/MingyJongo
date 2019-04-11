@@ -58,7 +58,7 @@ client.on('ready', () => {
   }
 });
 
-const prefix = '!'
+const prefix = config.prefix
 client.on('message', (message) => {
   if(!message.content.startsWith(prefix) || message.author.bot) return;
 
@@ -70,54 +70,12 @@ client.on('message', (message) => {
     case "ping":
       message.channel.send('pong!');
       break;
-      /*
-    case "fake": 
-        var gameIndex = 0;
-        axios.get('https://www.speedrun.com/api/v1/runs/z13w58gm',{
-          params:{
-            embed: 'game,category,players'
-          }
-        })
-        .then(function(response){
-          var catName = response.data.data.game.data.names.international + ' ' + response.data.data.category.data.name;
-          var userName = response.data.data.players.data[0];
-          if(userName.names === undefined){
-            userName = userName.name;
-          }
-          else{
-            userName = userName.names.international;
-          }
-          var time =  moment.duration(response.data.data.times.primary)._data;
-          var timeStr = '';
-          if(time.hours != 0){
-            timeStr = timeStr + time.hours + ':';
-            if(time.minutes < 10){
-              timeStr = timeStr + '0';
-            }
-          }
-          timeStr = timeStr + time.minutes + ':';
-          if(time.seconds < 10){
-            timeStr = timeStr + '0';
-          }
-          timeStr = timeStr + time.seconds;
-          stringIndex = Math.floor(Math.random()*(PB_text.data.length +1 ));
-          var embed = new Discord.RichEmbed()
-            .setAuthor(PB_text.data[stringIndex].author.name,PB_text.data[stringIndex].author.image)
-            .setTitle(response.data.data.weblink)
-            .setDescription(PB_text.data[stringIndex].description)
-            .addField(`${userName} got a ${timeStr} in ${catName}!`,PB_text.data[stringIndex].field.description);
-            //.setThumbnail(response.data.data.videos.links[0].uri);
-          PBChan.send({embed});
-        })
-        .catch(console.error);
-      break;*/
     default:
       break;
   }
 });
 
 //NOTIFY BK MOD TO CHECK SR.COM
-/*
 var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
   console.log('Checking for runs to verify');
   speedrun_com.get('/runs', {
@@ -128,16 +86,16 @@ var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
   })
   .then(function (response) {
     if(response.data.pagination.size != 0){
-      //DM correct mod
       var tempStr = 's';
       if(response.data.pagination.size == 1){
         tempStr = ''
       }
-      var  today = new Date().getDay()
+
+      //DM correct mod
       var  todaysMod =  client.users.find('username','Mittenz');
-      switch(today){
-        case 0: //Sunday 
-          todaysMod = client.users.find('id','TheMartonfi');
+      switch(config.bk_mods.currMod){
+        case 0:
+          todaysMod =  client.users.find('username','Mittenz');
           break;
         case 1:
           todaysMod = client.users.find('username','Stivitybobo');
@@ -154,17 +112,23 @@ var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
         case 5:
           todaysMod = client.users.find('username','The8bitbeast');
           break;
+        case 6:
+          todaysMod = client.users.find('username','Dickhiskhan');
+          break;
         default:
           todaysMod =  client.users.find('username','Mittenz');
           break;
-      }    
+      }
+      //advance and save current mod
+      config.bk_mods.currMod++;
+      config.bk_mods.currMod %= 7;
+      fs.writeFileSync('./config.json',JSON.stringify(config));
 
       todaysMod.send('Bzzarrgh! Foolish bear, why have you not checked Speedrun.com today? A few more shocks from my stick seem necessary to get you to check the ' + response.data.pagination.size + ' run'+ tempStr + ' waiting to be verified...');
     }
   })
   .catch(console.error);
 });
-*/
 
 //CHECK SR.COM FOR NEW PB's
 var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
