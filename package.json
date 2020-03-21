@@ -10,9 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.1",
-    "discord.js": "^11.3.2",
-    "moment": "^2.22.2",
+    "discord.js": "^11.6.3",
+    "moment": "^2.24.0",
     "node-fetch": "^2.2.0",
-    "node-schedule": "^1.3.0"
+    "node-schedule": "^1.3.2"
   }
 }
