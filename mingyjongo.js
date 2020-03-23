@@ -29,8 +29,17 @@ var supportedGames = [
   {'name':'Banjo-Kazooie', 'id': '9dokge1p','last_verified': {}},
   {'name':'Banjo-Tooie', 'id': 'm1m7pp12', 'last_verified': {}},
   {'name':'Banjo-Kazooie: Nuts & Bolts', 'id':'3dxze41y', 'last_verified': {}},
-  {'name':'Banjo-Kazooie: Grunty\'s Revenge', 'id':'yd47epde','last_verified':{}}
+  {'name':'Banjo-Kazooie: Grunty\'s Revenge', 'id':'yd47epde','last_verified':{}},
+  {'name':'Banjo-Pilot', 'id':'k6q9rm1g','last_verified':{}}
 ];
+
+//hardcoded list of mods that want to be messaged, converting their speedrun.com username into a Discord ID
+//add or remove as necessary
+//modsToMessage[
+var modsToMessage = {'Azmi':'184166863092187136','Hyperresonance':'81535438686261248','The8bitbeast':'140431496832876544',
+                    'Mittenz':'103188396129677312','Stivitybobo':'80515986414899200',
+                    
+                    'Blazephlozard':'87071783609434112'};
 
 //DISCORD
 client.on('ready', () => {
@@ -85,8 +94,8 @@ client.on('message', (message) => {
             todaysMod %= mods.length
             srcom.getUserName(mods[todaysMod])
             .then(function(username){
-              if(username === 'Hyperresonance'){username = 'Hyper';}
-              discord_user = client.users.find(r => r.username === username);
+              //if(username === 'Hyperresonance'){username = 'Hyper';}
+              discord_user = client.users.get(modsToMessage[username]);
               if(discord_user){
                 message.channel.send("messaging " + username);
                 console.log(discord_user);
@@ -136,7 +145,7 @@ var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
         todaysMod %= mods.length
         srcom.getUserName(mods[todaysMod])
         .then(function(username){
-          discord_user = client.users.find(r => r.username === username);
+          discord_user = client.users.get(modsToMessage[username]);
           if(discord_user){
             //message.channel.send("messaging " + username);
             //console.log(discord_user);
@@ -206,12 +215,17 @@ var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
                timeStr = timeStr + '0';
            }
            timeStr = timeStr + time.seconds;
-           stringIndex = Math.floor(Math.random()*(PB_text.data.length +1 ));
+           var gameName = supportedGames[i].name;
+           
+           //not many GR/Pilot/NB messages yet
+           if (gameName != "Banjo-Kazooie" && gameName != "Banjo-Tooie") { gameName = "Banjo-Kazooie"; }
+           
+           stringIndex = Math.floor(Math.random()*(PB_text[gameName].data.length +1 ));
           var embed = new Discord.RichEmbed()
-            .setAuthor(PB_text.data[stringIndex].author.name,PB_text.data[stringIndex].author.image)
+            .setAuthor(PB_text[gameName].data[stringIndex].author.name,PB_text[gameName].data[stringIndex].author.image)
             .setTitle(response.data.data.weblink)
-            .setDescription(PB_text.data[stringIndex].description)
-            .addField(`${userName} got a ${timeStr} in ${catName}!`,PB_text.data[stringIndex].field.description);
+            .setDescription(PB_text[gameName].data[stringIndex].description)
+            .addField(`${userName} got a ${timeStr} in ${catName}!`,PB_text[gameName].data[stringIndex].field.description);
             //.setThumbnail(response.data.data.videos.links[0].uri);
           PBChan.send({embed});
          })
