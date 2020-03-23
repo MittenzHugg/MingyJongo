@@ -1,14 +1,7 @@
-{
-  "data": [{
-    "author":{
-      "name":"Mingy Jongo",
-      "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png"
-    },
-    "description":"Bzzarrgh!",
-    "field":{
-      "description":"I calculate my chances of stopping them are now minimal..."
-    }
-  },
+PB_text = {
+  
+  "Banjo-Kazooie":{
+  "data": [
   {
     "author":{
       "name":"Wozza", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/2/28/Wozza_icon.png"
@@ -71,6 +64,55 @@
     "field":{
       "description":"You look faster already! Not sure how I can tell, but it's true!"
     }
+  }
+  ]},
+           
+  "Banjo-Tooie":{
+  "data": [{
+    "author":{
+      "name":"Mingy Jongo",
+      "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png"
+    },
+    "description":"Bzzarrgh!",
+    "field":{
+      "description":"I calculate my chances of stopping them are now minimal..."
+    }
+  },
+  {
+    "author":{
+      "name":"Klungo", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/80/Klungo_icon.png"
+    },
+    "description":"Klungo clever, learn lotsss. Hasss learnt of new PB!",
+    "field":{
+      "description":"Ssstupid ssspeedrunner bopped poor Klungo!"
+    }
+  },    
+  {
+    "author":{
+      "name":"Gobi", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/5/5a/Gobi_icon.png"
+    },
+    "description":"Oi! My precious rank.",
+    "field":{
+      "description":"Will you stop that! It took me ages to climb the leaderboard."
+    }
+  },
+  {
+    "author":{
+      "name":"Boggy", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/f/f7/Boggy_icon.png"
+    },
+    "description":"Take a look at this brand new PB!",
+    "field":{
+      "description":"It's got loads of features!"
+    }
+  },
+  {
+    "author":{
+      "name":"Boggy", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/f/f7/Boggy_icon.png"
+    },
+    "description":"",
+    "field":{
+      "description":"You look faster already! Not sure how I can tell, but it's true!"
+    }
   },
   {
     "author":{
@@ -80,5 +122,45 @@
     "field":{
       "description":"That was a brand new PB - have you any idea how much they cost these days?!"
     }
-  }]
+  }
+  ]},
+  
+   "Banjo-Kazooie: Grunty's Revenge":{
+  "data": [
+    {
+    "author":{
+      "name":"Klungo", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/80/Klungo_icon.png"
+    },
+    "description":"Klungo clever, learn lotsss. Hasss learnt of new PB!",
+    "field":{
+      "description":"Ssstupid ssspeedrunner bopped poor Klungo!"
+    }
+  }
+  ]},
+  
+  "Banjo-Pilot":{
+  "data": [
+     {
+    "author":{
+      "name":"Jolly Roger", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/85/Jolly.png"
+    },
+    "description":"Well, really!",
+    "field":{
+      "description":"That was a brand new PB - have you any idea how much they cost these days?!"
+    }
+  }
+  ]},
+  
+  "Banjo-Kazooie: Nuts & Bolts":{
+  "data": [
+     {
+    "author":{
+      "name":"Boggy", "image":"https://statici.behindthevoiceactors.com/behindthevoiceactors/_img/chars/thumbs/boggy-banjo-kazooie-nuts-and-bolts-0.31_thumb.jpg"
+    },
+    "description":"",
+    "field":{
+      "description":"You look faster already! Not sure how I can tell, but it's true!"
+    }
+  }
+  ]}
 }
