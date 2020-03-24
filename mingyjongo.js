@@ -98,7 +98,6 @@ client.on('message', (message) => {
 		  }
 		  
           break;
-		case 
         default:
           break;
       }
