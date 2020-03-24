@@ -223,10 +223,10 @@ var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
                timeStr = timeStr + '0';
            }
            timeStr = timeStr + time.seconds;
-           var gameName = supportedGames[i].name;
            
-           //not many GR/Pilot/NB messages yet
-           if (gameName != "Banjo-Kazooie" && gameName != "Banjo-Tooie") { gameName = "Banjo-Kazooie"; }
+           var gameName = supportedGames[i].name;
+           //baseGame would allow romhacks to use another game's PB texts
+           if (supportedGames[i].base_game) { gameName = supportedGames[i].base_game; }
            
            stringIndex = Math.floor(Math.random()*(PB_text[gameName].data.length +1 ));
           var embed = new Discord.RichEmbed()
