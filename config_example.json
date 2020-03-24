@@ -4,5 +4,28 @@
         "PB_channel":{
             "name":"community-pbs"
         }  
+    },
+    "currMod":[0,0,0,0,0],
+    "gameMods":{
+	"Banjo-Kazooie":[
+		{"name":"Mittenz", "id":"103188396129677312", "hour":21},
+		{"name":"Azmi", "id":"184166863092187136", "hour":21},
+		{"name":"Hyperresonance", "id":"81535438686261248", "hour":21},
+		{"name":"The8bitbeast", "id":"140431496832876544", "hour":21},
+		{"name":"Stivitybobo", "id":"80515986414899200", "hour":21}
+	],
+	"Banjo-Tooie":[
+		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2}
+	],
+	"Banjo-Kazooie: Grunty's Revenge":[
+		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2}
+	],
+	"Banjo-Pilot":[
+		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2}
+	],
+	"Banjo-Kazooie: Nuts & Bolts":[
+		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2}
+	]
+
     }
 }
