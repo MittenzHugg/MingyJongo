@@ -33,14 +33,6 @@ var supportedGames = [
   {'name':'Banjo-Pilot', 'id':'k6q9rm1g','last_verified':{}}
 ];
 
-//hardcoded list of mods that want to be messaged, converting their speedrun.com username into a Discord ID
-//add or remove as necessary
-//modsToMessage[
-var modsToMessage = {'Azmi':'184166863092187136','Hyperresonance':'81535438686261248','The8bitbeast':'140431496832876544',
-                    'Mittenz':'103188396129677312','Stivitybobo':'80515986414899200',
-                    
-                    'Blazephlozard':'87071783609434112'};
-
 //DISCORD
 client.on('ready', () => {
   //find last verified runs
@@ -87,35 +79,26 @@ client.on('message', (message) => {
           message.channel.send('pong!');
           break;
         case "test_bk_mod":
-          srcom.getGameMods('9dokge1p')
-          .then(function(mods){
-            var todaysMod = args.shift()%mods.length;
-            console.log(config.bk_mods.currMod);
-            todaysMod %= mods.length
-            srcom.getUserName(mods[todaysMod])
-            .then(function(username){
-              //if(username === 'Hyperresonance'){username = 'Hyper';}
-              if(modsToMessage[username]){
-                  discord_user = client.users.get(modsToMessage[username]);
-              }
-              else{
-                  discord_user = client.users.find(r => r.username === username);
-                  modsToMessage[username] = discord_user.id;
-                  // ToDo : store modsToMessage in .json 
-              }
-              
-              if(discord_user){
-                message.channel.send("messaging " + username);
-                console.log(discord_user);
-                discord_user.send('Bzzarrgh! Foolish bear, this is just a test of the verify runs DM system linking you to https://www.speedrun.com/runsawaitingverification');
-              }
-              else{
-                message.channel.send("Could not find discord user " + username);
-              }
-            });
-          });
-
+		  var todaysMod = config.gameMods[supportedGames[0].name][config.currMod[0]]
+		  console.log(config.currMod[i]);
+		  if(todaysMod.id){
+			  discord_user = client.users.get(todaysMod.id);
+		  }
+		  else{
+			  discord_user = client.users.find(r => r.username === todaysMod.name);
+			  todaysMod.id = discord_user.id; 
+		  }
+		   if(discord_user){
+			message.channel.send("messaging " + username);
+			console.log(discord_user);
+			discord_user.send('Bzzarrgh! Foolish bear, this is just a test of the verify runs DM system linking you to https://www.speedrun.com/runsawaitingverification');
+		  }
+		  else{
+			message.channel.send("Could not find discord user " + username);
+		  }
+		  
           break;
+		case 
         default:
           break;
       }
@@ -125,51 +108,52 @@ client.on('message', (message) => {
     }
   }
   else{
-    console.log('Command not sent in private_thoughts');
+    console.log('Command not sent in admins');
   }
 });
 
 //NOTIFY BK MOD TO CHECK SR.COM
-var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
+var bk_mod_reminder = schedule.scheduleJob('00 * * * *', function(fireDate){
   console.log('Checking for runs to verify');
-  speedrun_com.get('/runs', {
-    params: {
-      game: '9dokge1p',
-      status: 'new'
-    }
-  })
-  .then(function (response) {
-    if(response.data.pagination.size != 0){
-      var tempStr = 's';
-      if(response.data.pagination.size == 1){
-        tempStr = ''
-      }
+  for(var i = 0; i< supportedGames.length; i++){
+	  //Daily mod change
+	  if(fireDate.getHours() == 0) { 
+		config.currMod[i]++;
+		config.currMod[i] %= config.gameMods[i].length;
+	  }
+	  var todaysMod = config.gameMods[supportedGames[i].name][config.currMod[i]]
+	  //it's this mod's time
+	  if(fireDate.getHours() == todaysMod.hour) {
+		  speedrun_com.get('/runs', {
+			params: {
+			  game: supportedGames[i].id,
+			  status: 'new'
+			}
+		  })
+		  .then(function (response) {
+			if(response.data.pagination.size != 0){
+			  var tempStr = 's';
+			  if(response.data.pagination.size == 1){
+				tempStr = ''
+			  }
 
-      //find game mods
-      var todaysMod = config.bk_mods.currMod;
-      srcom.getGameMods('9dokge1p')
-      .then(function(mods){
-        console.log(config.bk_mods.currMod);
-        todaysMod %= mods.length
-        srcom.getUserName(mods[todaysMod])
-        .then(function(username){
-          discord_user = client.users.get(modsToMessage[username]);
-          if(discord_user){
-            //message.channel.send("messaging " + username);
-            //console.log(discord_user);
-            discord_user.send('Bzzarrgh! Foolish bear, why have you not checked Speedrun.com today? A few more shocks from my stick seem necessary to get you to check the ' + response.data.pagination.size + ' run'+ tempStr + ' waiting to be verified...\n https://www.speedrun.com/runsawaitingverification');
-          }
-          else{
-            //message.channel.send("Could not find discord user " + username);
-          }
-        });
-      });
-      config.bk_mods.currMod++;
-      config.bk_mods.currMod %= mods.length;
-      fs.writeFileSync('./config.json',JSON.stringify(config));
-    }
-  })
-  .catch(console.error);
+			  //find game mods
+			  console.log(config.currMod[i]);
+			  discord_user = client.users.get(todaysMod.id);
+			  if(discord_user){
+				//message.channel.send("messaging " + username);
+				//console.log(discord_user);
+				discord_user.send('Bzzarrgh! Foolish bear, why have you not checked Speedrun.com today? A few more shocks from my stick seem necessary to get you to check the ' + response.data.pagination.size + ' run'+ tempStr + ' waiting to be verified...\n https://www.speedrun.com/runsawaitingverification');
+			  }
+			  else{
+				//message.channel.send("Could not find discord user " + username);
+			  }
+			}
+		  })
+		  .catch(console.error);
+	  }
+  }
+  fs.writeFileSync('./config.json',JSON.stringify(config));
 });
 
 
