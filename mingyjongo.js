@@ -95,7 +95,15 @@ client.on('message', (message) => {
             srcom.getUserName(mods[todaysMod])
             .then(function(username){
               //if(username === 'Hyperresonance'){username = 'Hyper';}
-              discord_user = client.users.get(modsToMessage[username]);
+              if(modsToMessage[username]){
+                  discord_user = client.users.get(modsToMessage[username]);
+              }
+              else{
+                  discord_user = client.users.find(r => r.username === username);
+                  modsToMessage[username] = discord_user.id;
+                  // ToDo : store modsToMessage in .json 
+              }
+              
               if(discord_user){
                 message.channel.send("messaging " + username);
                 console.log(discord_user);
@@ -260,4 +268,3 @@ srcom = {
     });
   }
 }
-
