@@ -55,6 +55,15 @@ PB_text = {
     "field":{
       "description":"You look faster already! Not sure how I can tell, but it's true!"
     }
+  },
+    {
+    "author":{
+      "name":"Gruntilda", "image":"https://i.imgur.com/IvxKcnN.png"
+    },
+    "description":"You may have won, but soon you'll see!",
+    "field":{
+      "description":"I'll make sure that's your last PB!"
+    }
   }
   ]},
            
