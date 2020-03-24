@@ -1,14 +1,7 @@
-{
-  "data": [{
-    "author":{
-      "name":"Mingy Jongo",
-      "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png"
-    },
-    "description":"Bzzarrgh!",
-    "field":{
-      "description":"I calculate my chances of stopping them are now minimal..."
-    }
-  },
+PB_text = {
+  
+  "Banjo-Kazooie":{
+  "data": [
   {
     "author":{
       "name":"Wozza", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/2/28/Wozza_icon.png"
@@ -26,16 +19,7 @@
     "field":{
       "description":"Mmmm...lovely!"
     }
-  },
-  {
-    "author":{
-      "name":"Klungo", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/80/Klungo_icon.png"
-    },
-    "description":"Klungo clever, learn lotsss. Hasss learnt of new PB!",
-    "field":{
-      "description":"Ssstupid ssspeedrunner bopped poor Klungo!"
-    }
-  },    
+  },   
   {
     "author":{
       "name":"Gobi", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/f/f3/Gobi_head.png"
@@ -72,6 +56,55 @@
       "description":"You look faster already! Not sure how I can tell, but it's true!"
     }
   },
+    {
+    "author":{
+      "name":"Gruntilda", "image":"https://i.imgur.com/IvxKcnN.png"
+    },
+    "description":"You may have won, but soon you'll see!",
+    "field":{
+      "description":"I'll make sure that's your last PB!"
+    }
+  }
+  ]},
+           
+  "Banjo-Tooie":{
+  "data": [{
+    "author":{
+      "name":"Mingy Jongo",
+      "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png"
+    },
+    "description":"Bzzarrgh!",
+    "field":{
+      "description":"I calculate my chances of stopping them are now minimal..."
+    }
+  },
+  {
+    "author":{
+      "name":"Klungo", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/80/Klungo_icon.png"
+    },
+    "description":"Klungo clever, learn lotsss. Hasss learnt of new PB!",
+    "field":{
+      "description":"Ssstupid ssspeedrunner bopped poor Klungo!"
+    }
+  },    
+   {
+    "author":{
+      "name":"Saucer of Peril", "image":"https://i.imgur.com/kJMLswL.png"
+    },
+    "description":"Bleep! New best time!",
+    "field":{
+      "description":"Waz I of azziztance? Bleep!"
+    }
+  },    
+  {
+    "author":{
+      "name":"Gobi", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/5/5a/Gobi_icon.png"
+    },
+    "description":"You got through the Lava World?!",
+    "field":{
+      "description":"...you're coming back for me, right?"
+    }
+  },
   {
     "author":{
       "name":"Jolly Roger", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/85/Jolly.png"
@@ -80,5 +113,81 @@
     "field":{
       "description":"That was a brand new PB - have you any idea how much they cost these days?!"
     }
-  }]
+  }
+  ]},
+  
+   "Banjo-Kazooie: Grunty's Revenge":{
+  "data": [
+    {
+    "author":{
+      "name":"Bozzeye", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/9f/Bozzeyeicon.png"
+    },
+    "description":"I can hardly believe my eyes!",
+    "field":{
+      "description":"You really sent that witch packin'!"
+    }
+    },
+    {
+    "author":{
+      "name":"Mecha-Grunty", "image":"https://i.imgur.com/6WhmrMe.png"
+    },
+    "description":"Past or present, you always win...",
+    "field":{
+      "description":"But I will always try again!"
+    }
+    }
+  ]},
+  
+  "Banjo-Pilot":{
+  "data": [
+     {
+    "author":{
+      "name":"Bottles", "image":"https://i.imgur.com/pB8Te4E.png"
+    },
+    "description":"Great flying!",
+    "field":{
+      "description":"You're even faster than me!"
+    }
+    },
+    {
+    "author":{
+      "name":"Gruntilda", "image":"https://i.imgur.com/Nz23MlS.png"
+    },
+    "description":"You really showed your flying skill!",
+    "field":{
+      "description":"All that boosting made me ill!"
+    }
+    }
+  ]},
+  
+  "Banjo-Kazooie: Nuts & Bolts":{
+  "data": [
+     {
+    "author":{
+      "name":"Klungo", "image":"https://i.imgur.com/t5cqBRt.png"
+    },
+    "description":"Klungo clever, learn lotsss. Hasss learnt of new PB!",
+    "field":{
+      "description":"You ssshould ssspeedrun Klungo's game!"
+    }
+    },
+     {
+    "author":{
+      "name":"Pikelet", "image":"https://i.imgur.com/1Zag36v.png"
+    },
+    "description":"Oi, ya slipped right under my nose!",
+    "field":{
+      "description":"I'll get ya next time, punk!"
+    }
+    },
+    {
+    "author":{
+      "name":"Trophy Thomas", "image":"https://i.imgur.com/fVjLagA.png"
+    },
+    "description":"Not bad, kid!",
+    "field":{
+      "description":"You're almost as fast as me!"
+    }
+  }
+  ]}
 }
