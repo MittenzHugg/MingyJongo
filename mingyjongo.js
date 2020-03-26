@@ -59,6 +59,24 @@ client.on('ready', () => {
   }
 });
 
+function updateHour(userID, newHour) {
+	//make sure it's a legit hour (less than 0 is okay, just means do not DM)
+	if (newHour > 23 || !Number.isInteger(newHour)) { return false; }
+	var foundUser = false;
+	for(var i = 0; i< supportedGames.length; i++){
+		for (var j = 0; j < config.gameMods[supportedGames[i].name].length; j++) {
+			var tempMod = config.gameMods[supportedGames[i].name][j]
+			if (tempMod.id === userID) {
+				//TODO: Add ALL moderators to the config file, with an hour of -1
+				foundUser = true;
+				tempMod.hour = newHour;
+			}
+		}
+	}
+	if (foundUser) { fs.writeFileSync('./config.json',JSON.stringify(config)); }
+	return foundUser;
+}
+
 const prefix = config.prefix
 client.on('message', (message) => {
   if(message.author.bot) return;
@@ -79,7 +97,7 @@ client.on('message', (message) => {
           message.channel.send('pong!');
           break;
         case "test_bk_mod":
-		  var todaysMod = config.gameMods[supportedGames[0].name][config.currMod[0]]
+		  var todaysMod = config.gameMods[supportedGames[0].name][config.currMod[0]];
 		  console.log(config.currMod[i]);
 		  if(todaysMod.id){
 			  discord_user = client.users.get(todaysMod.id);
@@ -96,8 +114,24 @@ client.on('message', (message) => {
 		  else{
 			message.channel.send("Could not find discord user " + username);
 		  }
-		  
           break;
+		case "start":
+			var newHour = parseInt(args[0]);
+			if (newHour === NaN || !Number.isInteger(newHour) || newHour < 0 || newHour > 23) {
+				message.member.send("Foolish human! You must enter an hour between 0 and 23! And make sure you are a game moderator as well!");
+			}
+			else if (updateHour(message.member.id, newHour)) {
+				message.channel.send("You will now receive run verification notifications at " + newHour + ":00!");
+			}
+			else {
+				message.member.send("Foolish human! You must be a game moderator to receive my notifications!");
+			}
+			break;
+		case "stop":
+			if (updateHour(message.member.id, -1)) {
+				message.channel.send("You are free from my notifications... for now...");
+			}
+			break;
         default:
           break;
       }
@@ -117,8 +151,11 @@ var bk_mod_reminder = schedule.scheduleJob('00 * * * *', function(fireDate){
   for(var i = 0; i< supportedGames.length; i++){
 	  //Daily mod change
 	  if(fireDate.getHours() == 0) { 
-		config.currMod[i]++;
-		config.currMod[i] %= config.gameMods[i].length;
+		do {
+			config.currMod[i]++;
+			config.currMod[i] %= config.gameMods[i].length;
+		}
+		while (config.gameMods[supportedGames[i].name][config.currMod[i]].hour < 0);
 	  }
 	  var todaysMod = config.gameMods[supportedGames[i].name][config.currMod[i]]
 	  //it's this mod's time
