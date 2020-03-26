@@ -15,16 +15,29 @@
 		{"name":"Stivitybobo", "id":"80515986414899200", "hour":21}
 	],
 	"Banjo-Tooie":[
-		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2}
+		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2},
+		{"name":"Madtaz64", "id":"86208113782292480", "hour":-1},
+		{"name":"Hyperresonance", "id":"81535438686261248", "hour":21},
+		{"name":"Konditioner", "id":"691776424243232789", "hour":-1},
+		{"name":"Pjii", "id":"692763569397301328", "hour":-1}
 	],
 	"Banjo-Kazooie: Grunty's Revenge":[
-		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2}
+		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2},
+		{"name":"Hyperresonance", "id":"81535438686261248", "hour":21},
+		{"name":"g0goTBC", "id":"692839340362956830", "hour":-1}
 	],
 	"Banjo-Pilot":[
-		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2}
+		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2},
+		{"name":"Hyperresonance", "id":"81535438686261248", "hour":21}
+		//Jumpy and ikkatosh are not in Banjo Discord
 	],
 	"Banjo-Kazooie: Nuts & Bolts":[
-		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2}
+		{"name":"Blazephlozard", "id":"87071783609434112", "hour":2},
+		{"name":"Madtaz64", "id":"86208113782292480", "hour":-1},
+		{"name":"Hyperresonance", "id":"81535438686261248", "hour":21},
+		{"name":"g0goTBC", "id":"692839340362956830", "hour":-1},
+		{"name":"Sceptify", "id":"692041962328424538", "hour":-1}
+		//Scykoh is not in Banjo Discord
 	]
 
     }
