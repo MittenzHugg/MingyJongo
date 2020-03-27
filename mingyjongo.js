@@ -26,11 +26,11 @@ const PB_text = require('./PBTexts.json');
 var PBChan = {};
 
 var supportedGames = [
-  {'name':'Banjo-Kazooie', 'id': '9dokge1p','last_verified': {}},
-  {'name':'Banjo-Tooie', 'id': 'm1m7pp12', 'last_verified': {}},
-  {'name':'Banjo-Kazooie: Nuts & Bolts', 'id':'3dxze41y', 'last_verified': {}},
-  {'name':'Banjo-Kazooie: Grunty\'s Revenge', 'id':'yd47epde','last_verified':{}},
-  {'name':'Banjo-Pilot', 'id':'k6q9rm1g','last_verified':{}}
+  {'name':'Banjo-Kazooie', 'id': '9dokge1p', 'abbrev': 'bk', 'last_verified': {}},
+  {'name':'Banjo-Tooie', 'id': 'm1m7pp12', 'abbrev': 'bt', 'last_verified': {}},
+  {'name':'Banjo-Kazooie: Nuts & Bolts', 'abbrev': 'bknb', 'id':'3dxze41y', 'last_verified': {}},
+  {'name':'Banjo-Kazooie: Grunty\'s Revenge', 'abbrev': 'bkgr', 'id':'yd47epde','last_verified':{}},
+  {'name':'Banjo-Pilot', 'id':'k6q9rm1g', 'abbrev': 'bp','last_verified':{}}
 ];
 
 //DISCORD
@@ -91,7 +91,7 @@ client.on('message', (message) => {
       //seperate command from argument array
       const args = message.content.slice(prefix.length).trim().split(/ +/g);
       const command = args.shift().toLowerCase(); 
-        
+      var remove = false;
       switch(command){
         case "ping":
           message.channel.send('pong!');
@@ -132,6 +132,51 @@ client.on('message', (message) => {
 				message.channel.send("You are free from my notifications... for now...");
 			}
 			break;
+		case "remove_mod":
+		case "removemod":
+			//there's a lot of similarities between adding or removing a mod through text so I kept them together for now
+			remove = true;
+		case "add_mod":
+		case "addmod":
+			if (args[0] && args[1]) {
+				var chosenGameNum = -1;
+				for(var i = 0; i< supportedGames.length; i++){
+					if (supportedGames[i].abbrev == args[0]) {
+						chosenGameNum = i;
+						break;
+					}
+				}
+				if (chosenGameNum != -1) {
+					var chosenGameMods = config.gameMods[supportedGames[chosenGameNum].name]
+					discord_user = client.users.find(r => r.username === args[1]);
+					if (discord_user) {
+						var found = -1;
+						for (var i = 0; i < chosenGameMods.length; i++) {
+							if (chosenGameMods.id == discord_user.id) {
+								found = i;
+								break;
+							}
+						}
+						if (remove) {
+							if (found != -1) {
+								chosenGameMods.splice(found,1);
+							}
+							else { message.channel.send("User is not a mod for that game!"); }
+						}
+						else /*add*/{
+							if (found == -1) {
+								chosenGameMods[chosenGameMods.length] = {"name":args[2], "id":discord_user.id, "hour":-1}
+							}
+							else { message.channel.send("User is already a mod for that game!"); }
+						}
+						fs.writeFileSync('./config.json',JSON.stringify(config));
+					}
+					else { message.channel.send("User not found!"); }
+				}
+				else { message.channel.send("Game not found!"); }
+			}
+			else { message.channel.send("Add/remove who to what??? (Use srcom abbrevation. Example: !add_mod bk Azmi)"); }
+			break;
         default:
           break;
       }
@@ -151,11 +196,14 @@ var bk_mod_reminder = schedule.scheduleJob('00 * * * *', function(fireDate){
   for(var i = 0; i< supportedGames.length; i++){
 	  //Daily mod change
 	  if(fireDate.getHours() == 0) { 
+		//prevent infinite loop if no mods are DMable
+		var tries = 0;
 		do {
 			config.currMod[i]++;
 			config.currMod[i] %= config.gameMods[i].length;
+			tries++;
 		}
-		while (config.gameMods[supportedGames[i].name][config.currMod[i]].hour < 0);
+		while (config.gameMods[supportedGames[i].name][config.currMod[i]].hour < 0 && tries < config.gameMods[i].length);
 	  }
 	  var todaysMod = config.gameMods[supportedGames[i].name][config.currMod[i]]
 	  //it's this mod's time
