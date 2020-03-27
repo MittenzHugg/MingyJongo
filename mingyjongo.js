@@ -26,11 +26,11 @@ const PB_text = require('./PBTexts.json');
 var PBChan = {};
 
 var supportedGames = [
-  {'name':'Banjo-Kazooie', 'id': '9dokge1p', 'abbrev': 'bk', 'last_verified': {}},
-  {'name':'Banjo-Tooie', 'id': 'm1m7pp12', 'abbrev': 'bt', 'last_verified': {}},
+  {'name':'Banjo-Kazooie', 'abbrev': 'bk', 'id': '9dokge1p', 'last_verified': {}},
+  {'name':'Banjo-Tooie', 'abbrev': 'bt', 'id': 'm1m7pp12', 'last_verified': {}},
   {'name':'Banjo-Kazooie: Nuts & Bolts', 'abbrev': 'bknb', 'id':'3dxze41y', 'last_verified': {}},
   {'name':'Banjo-Kazooie: Grunty\'s Revenge', 'abbrev': 'bkgr', 'id':'yd47epde','last_verified':{}},
-  {'name':'Banjo-Pilot', 'id':'k6q9rm1g', 'abbrev': 'bp','last_verified':{}}
+  {'name':'Banjo-Pilot', 'abbrev': 'bp', 'id':'k6q9rm1g', 'last_verified':{}}
 ];
 
 //DISCORD
@@ -115,13 +115,15 @@ client.on('message', (message) => {
 			message.channel.send("Could not find discord user " + username);
 		  }
           break;
+		//TODO: move start/stop out of the 'only in #admins by admins' switch statement
+		//Also, what is the time zone of the notifications?
 		case "start":
 			var newHour = parseInt(args[0]);
 			if (newHour === NaN || !Number.isInteger(newHour) || newHour < 0 || newHour > 23) {
 				message.member.send("Foolish human! You must enter an hour between 0 and 23! And make sure you are a game moderator as well!");
 			}
 			else if (updateHour(message.member.id, newHour)) {
-				message.channel.send("You will now receive run verification notifications at " + newHour + ":00!");
+				message.channel.send("You will now receive run verification notifications at " + newHour + ":00 EST(?)!");
 			}
 			else {
 				message.member.send("Foolish human! You must be a game moderator to receive my notifications!");
@@ -160,12 +162,14 @@ client.on('message', (message) => {
 						if (remove) {
 							if (found != -1) {
 								chosenGameMods.splice(found,1);
+								message.channel.send(args[2] + " (" + discord_user.id + ") removed as mod!");
 							}
 							else { message.channel.send("User is not a mod for that game!"); }
 						}
 						else /*add*/{
 							if (found == -1) {
 								chosenGameMods[chosenGameMods.length] = {"name":args[2], "id":discord_user.id, "hour":-1}
+								message.channel.send(args[2] + " (" + discord_user.id + ") added as mod!");
 							}
 							else { message.channel.send("User is already a mod for that game!"); }
 						}
