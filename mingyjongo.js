@@ -36,10 +36,8 @@ var supportedGames = [
 //hardcoded list of mods that want to be messaged, converting their speedrun.com username into a Discord ID
 //add or remove as necessary
 //modsToMessage[
-var modsToMessage = {'Azmi':'184166863092187136','Hyperresonance':'81535438686261248','The8bitbeast':'140431496832876544',
-                    'Mittenz':'103188396129677312','Stivitybobo':'80515986414899200',
-                    
-                    'Blazephlozard':'87071783609434112'};
+var modsToMessage = {'Azmi':'184166863092187136','The8bitbeast':'140431496832876544',
+                    'Mittenz':'103188396129677312'};
 
 //DISCORD
 client.on('ready', () => {
@@ -74,7 +72,7 @@ client.on('message', (message) => {
   asker = message.mentions.users.first();
   channel = message.channel;
   //if(channel.name === 'private_thoughts'){
-  if(channel.name === 'admins'){
+  if(channel.name === 'admins' || channel.name === 'server_admin'){
     if (message.member.roles.find(r => r.name === 'Administrator')){
       if(!message.content.startsWith(prefix) || message.author.bot) return;
 
@@ -84,6 +82,7 @@ client.on('message', (message) => {
         
       switch(command){
         case "ping":
+	  console.log("Ping Recieved!");
           message.channel.send('pong!');
           break;
         case "test_bk_mod":
