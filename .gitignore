@@ -58,6 +58,9 @@ bower_components
 !.vscode/launch.json
 !.vscode/extensions.json
 
+#vim
+*.swp
+
 # misc
 .sass-cache
 connect.lock

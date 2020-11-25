@@ -223,9 +223,9 @@ var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
            }
            timeStr = timeStr + time.seconds;
            
-           var gameName = supportedGames[i].name;
+           var gameName = supportedGames[gameIndex].name;
            //baseGame would allow romhacks to use another game's PB texts
-           if (supportedGames[i].base_game) { gameName = supportedGames[i].base_game; }
+           if (supportedGames[gameIndex].base_game) { gameName = supportedGames[gameIndex].base_game; }
            
            stringIndex = Math.floor(Math.random()*(PB_text[gameName].data.length +1 ));
           var embed = new Discord.RichEmbed()
