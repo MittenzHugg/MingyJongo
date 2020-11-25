@@ -218,7 +218,8 @@ function announce_run(run, cur_game, channel){
             if(config.mode === 'final'){
 	    	PBChan.send({embed});
 	    } else {
-                PBChan.send({embed}).delete({timeout:30000});
+                var pb = PBChan.send({embed});
+	        pb.delete({timeout:30000});
 	    }
 	}
     }).catch(console.error);	
