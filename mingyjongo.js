@@ -223,6 +223,12 @@ var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
            }
            timeStr = timeStr + time.seconds;
            
+           var gameIndex = 0;
+           for(var i = 0; i<supportedGames.length; i++){
+               if(supportedGames[i].id == response.data.data[0].game){
+                   gameIndex = i;
+               }
+           }  
            var gameName = supportedGames[gameIndex].name;
            //baseGame would allow romhacks to use another game's PB texts
            if (supportedGames[gameIndex].base_game) { gameName = supportedGames[gameIndex].base_game; }
