@@ -2,14 +2,16 @@
 
 const fs = require('fs');
 
+var config = require('./config.json');
+
 //sensitive data(i.e. oauth tokens)
 const sensitive = require('./sensitive.json');
 
-//Discord
+    //Discord
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-//Timing
+    //Timing
 const moment = require('moment');
 var schedule = require('node-schedule');
 
@@ -19,7 +21,6 @@ var speedrun_com = axios.create({
   baseURL: 'https://www.speedrun.com/api/v1'
 });
 
-var config = require('./config.json');
 
 const PB_text = require('./PBTexts.json');
 
@@ -41,37 +42,29 @@ var modsToMessage = {'Azmi':'184166863092187136','The8bitbeast':'140431496832876
 
 //DISCORD
 client.on('ready', () => {
-  //find last verified runs
-  PBChan = client.channels.find(r => r.name === config.discord.PB_channel.name);
-  for (var i = 0; i < supportedGames.length; i++){
-    speedrun_com.get('/runs',{
-      params:{
-        game: supportedGames[i].id,
-        status:'verified',
-        orderby: 'verify-date',
-        direction: 'desc'
-      }
-    })
-    .then(function (response){
-      for(var i = 0; i< supportedGames.length; i++){
-        if(response.data.data[0].game == supportedGames[i].id){
-          supportedGames[i].last_verified = Date.parse(response.data.data[0].status['verify-date']);
-          //console.log(supportedGames[i]);
-          i = supportedGames.length;
-        }
-      }
-    })
-    .catch(console.error);
-  }
+    //find last verified runs
+    PBChan = client.channels.find(r => r.name === config.discord.PB_channel.name);
+    supportedGames.forEach((cur_game) => {
+        speedrun_com.get('/runs',{
+            params:{
+                game: cur_game.id,
+                status:'verified',
+                orderby: 'verify-date',
+                direction: 'desc'
+            }
+        }).then((response) => {
+	    cur_game.last_verified = Date.parse(response.data.data[0].status['verify-date']);
+        }).catch(console.error);
+    });
 });
 
 const prefix = config.prefix
+if(!(config.mode === 'local')){
 client.on('message', (message) => {
   if(message.author.bot) return;
   if(!message.member) return;
   asker = message.mentions.users.first();
   channel = message.channel;
-  //if(channel.name === 'private_thoughts'){
   if(channel.name === 'admins' || channel.name === 'server_admin'){
     if (message.member.roles.find(r => r.name === 'Administrator')){
       if(!message.content.startsWith(prefix) || message.author.bot) return;
@@ -93,7 +86,6 @@ client.on('message', (message) => {
             todaysMod %= mods.length
             srcom.getUserName(mods[todaysMod])
             .then(function(username){
-              //if(username === 'Hyperresonance'){username = 'Hyper';}
               if(modsToMessage[username]){
                   discord_user = client.users.get(modsToMessage[username]);
               }
@@ -127,7 +119,9 @@ client.on('message', (message) => {
     console.log('Command not sent in private_thoughts');
   }
 });
+}
 
+if(!(config.mode==='local')){
 //NOTIFY BK MOD TO CHECK SR.COM
 var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
   console.log('Checking for runs to verify');
@@ -170,87 +164,155 @@ var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
   })
   .catch(console.error);
 });
+}
 
+/* */
+function announce_run(run, cur_game, channel){
+    axios.get(run.links[0].uri,{
+        params:{embed: 'game,category,players'}
+    }).then( (response) => {
+                  const game_data = response.data.data.game.data;
+		  const cat_data = response.data.data.category.data;
+                  const plyr_data = response.data.data.players.data;
+		  const cat_name = game_data.names.international + ' ' + cat_data.name; 
+	          var plyr_name = (plyr_data[0].names === undefined) ? plyr_data[0].name : plyr_data[0].names.international;
+		  for(var i = 1; i < plyr_data.length - 1; i++){	
+		      plyr_name += ', ' + ((plyr_data[i].names === undefined) ? plyr_data[i].name : plyr_data[0].names.international);
+		  }
+		  if(plyr_data.length > 2) 
+		      plyr_name += ', ';
+		  if(plyr_data.length > 1) 
+		      plyr_name += '& ' + ((plyr_data[plyr_data.length-1].name === undefined) ? plyr_data[plyr_data.length-1].name : plyr_data[plyr_data.length-1].names.international);
 
-//CHECK SR.COM FOR NEW PB's
-var newPBAnnounce = schedule.scheduleJob('* * * * *', function(){
-  //console.log('Checking for new PBs');
-  for(var i = 0; i < supportedGames.length; i++){
-  //for(var i = 0; i < 1; i++){
-    var numberNewRuns = 0;
-    speedrun_com.get('/runs',{
-      params:{
-        game: supportedGames[i].id,
-        status: 'verified',
-        orderby: 'verify-date',
-        direction: 'desc'
+                  const time = moment.duration(response.data.data.times.primary)._data;
+		  var timeStr = '';
+                  if(time.hours != 0){
+                      timeStr = timeStr + time.hours + ':';
+                      if(time.minutes < 10)
+                          timeStr = timeStr + '0';
+                  }
+                  timeStr = timeStr + time.minutes + ':';
+                  if(time.seconds < 10){
+                      timeStr = timeStr + '0';
+                  }
+                  timeStr = timeStr + time.seconds;
+                  
+		  //baseGame should allow romhacks to use another game's PB texts
+                  const gameName = (cur_game.base_game) ? cur_game.base_game : cur_game.name; 
+           
+        const stringIndex = Math.floor(Math.random()*(PB_text[gameName].data.length));
+	const pb_msg = PB_text[gameName].data[stringIndex];
+
+	if(config.mode === 'local'){
+		console.log(pb_msg.author);
+		console.log(response.data.data.weblink);
+		console.log(pb_msg.description);
+		console.log(`${plyr_name} got a ${timeStr} in ${cat_name}!`);
+		console.log(pb_msg.field.description + '\n');
+	} else {
+	    var embed = new Discord.RichEmbed()
+                .setAuthor(pb_msg.author.name,pb_msg.author.image)
+                .setTitle(response.data.data.weblink)
+                .setDescription(pb_msg.description)
+                .addField(`${plyr_name} got a ${timeStr} in ${cat_name}!`,pb_msg.field.description);
+            if(config.mode === 'final'){
+	    	PBChan.send({embed});
+	    } else {
+                var pb = PBChan.send({embed});
+	        pb.delete({timeout:30000});
+	    }
+	}
+    }).catch(console.error);	
+}
+
+function checkForPBs(){
+  supportedGames.forEach( (cur_game) => {
+      var numberNewRuns = 0;  
+      speedrun_com.get('/runs',{
+          params:{
+              game: cur_game.id,
+              status: 'verified',
+              orderby: 'verify-date',
+              direction: 'desc'
+          }
+      }).then((response) => {
+          const new_runs = response.data.data.filter((run) => {
+		return  Date.parse(run.status['verify-date']) > cur_game.last_verified;
+	  });
+	  const run_func = (run) => announce_run(run, cur_game);
+	  new_runs.forEach(run_func);
+          const ver_dates = new_run.map( x => Date.parse(x.status['verify-date']));
+          cur_game.last_verified = ver_dates.reduce((max, cur) => Math.max(max,cur), cur_game.last_verified);
+      }).catch(console.error);
+  });//forEach game
+}
+
+if(config.mode === 'final')
+	var newPBAnnounce = schedule.scheduleJob('* * * * *', checkForPBs);
+
+if(!(config.mode === 'local'))
+    client.login(sensitive.discord.token);
+
+process.stdin.on('data', (chunk) => {
+      const message = chunk.toString().trim() 
+
+      //seperate command from argument array
+      const args = message.split(/ +/g);
+      const command = args.shift().toLowerCase(); 
+        
+      switch(command){
+        case "ping":
+	  console.log("Ping Recieved!");
+          break;
+	case "announce_pbs":
+            supportedGames.forEach( (cur_game) => {
+                console.log(cur_game.name);
+		speedrun_com.get('/runs',{
+                    params:{
+                        game: cur_game.id,
+                        status: 'verified',
+                        orderby: 'verify-date',
+                        direction: 'desc'
+                    }
+                }).then((response) => {
+	            const new_run = response.data.data[0];
+	            announce_run(new_run, cur_game);
+                }).catch(console.error);
+	    });
+            break;
+        case "test_bk_mod":
+          srcom.getGameMods('9dokge1p')
+          .then(function(mods){
+            var todaysMod = args.shift()%mods.length;
+            console.log(config.bk_mods.currMod);
+            todaysMod %= mods.length
+            srcom.getUserName(mods[todaysMod])
+            .then(function(username){
+              if(modsToMessage[username]){
+                  discord_user = client.users.get(modsToMessage[username]);
+              }
+              else{
+                  discord_user = client.users.find(r => r.username === username);
+                  modsToMessage[username] = discord_user.id;
+                  // ToDo : store modsToMessage in .json 
+              }
+              
+              if(discord_user){
+                message.channel.send("messaging " + username);
+                console.log(discord_user);
+                discord_user.send('Bzzarrgh! Foolish bear, this is just a test of the verify runs DM system linking you to https://www.speedrun.com/runsawaitingverification');
+              }
+              else{
+                message.channel.send("Could not find discord user " + username);
+              }
+            });
+          });
+
+          break;
+        default:
+          break;
       }
-    })
-    .then(function(response){
-       var gameIndex = 0;
-       for(var i = 0; i<supportedGames.length; i++){
-         if(supportedGames[i].id == response.data.data[0].game){
-           gameIndex = i;
-         }
-       }
-       
-       for(var i = 0; i < response.data.pagination.size && supportedGames[gameIndex].last_verified < Date.parse(response.data.data[i].status['verify-date']); i++){
-         axios.get(response.data.data[i].links[0].uri,{
-           params:{
-             embed: 'game,category,players'
-           }
-         })
-         .then(function(response){
-           var catName = response.data.data.game.data.names.international + ' ' + response.data.data.category.data.name;
-           var userName = response.data.data.players.data[0];
-           if(userName.names === undefined){
-             userName = userName.name;
-           }
-           else{
-             userName = userName.names.international;
-           }
-           var time =  moment.duration(response.data.data.times.primary)._data;
-           var timeStr = '';
-           if(time.hours != 0){
-             timeStr = timeStr + time.hours + ':';
-             if(time.minutes < 10){
-               timeStr = timeStr + '0';
-             }
-           }
-           timeStr = timeStr + time.minutes + ':';
-           if(time.seconds < 10){
-               timeStr = timeStr + '0';
-           }
-           timeStr = timeStr + time.seconds;
-           
-           var gameIndex = 0;
-           for(var i = 0; i<supportedGames.length; i++){
-               if(supportedGames[i].id == response.data.data[0].game){
-                   gameIndex = i;
-               }
-           }  
-           var gameName = supportedGames[gameIndex].name;
-           //baseGame would allow romhacks to use another game's PB texts
-           if (supportedGames[gameIndex].base_game) { gameName = supportedGames[gameIndex].base_game; }
-           
-           stringIndex = Math.floor(Math.random()*(PB_text[gameName].data.length +1 ));
-          var embed = new Discord.RichEmbed()
-            .setAuthor(PB_text[gameName].data[stringIndex].author.name,PB_text[gameName].data[stringIndex].author.image)
-            .setTitle(response.data.data.weblink)
-            .setDescription(PB_text[gameName].data[stringIndex].description)
-            .addField(`${userName} got a ${timeStr} in ${catName}!`,PB_text[gameName].data[stringIndex].field.description);
-            //.setThumbnail(response.data.data.videos.links[0].uri);
-          PBChan.send({embed});
-         })
-         .catch(console.error);
-       }
-       supportedGames[gameIndex].last_verified = Date.parse(response.data.data[0].status['verify-date']);
-    })
-    .catch(console.error);
-  }
 });
-
-client.login(sensitive.discord.token);
 
 srcom = {
   getGameMods: function(gameID){
