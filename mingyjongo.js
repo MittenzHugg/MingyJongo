@@ -225,8 +225,12 @@ function announce_run(run, cur_game, channel){
                     .setTitle(response.data.data.weblink)
                     .setDescription(pb_msg.description)
                     .addField(`${plyr_name} got a ${timeStr} in ${cat_name}!`,pb_msg.field.description);
-	    	PBChan.send({embed})
-	            .then((msg) => {if(!(config.mode === 'final')) msg.delete({timeout:30000});});
+	    	if(config.mode === 'final'){
+		    PBChan.send({embed})
+		}
+		else{
+		    PBChan.send({embed}).then(rply => rply.delete({timeout: 30000}));
+		}
 	    }
         }).catch(console.error);	
 }
