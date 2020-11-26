@@ -27,11 +27,11 @@ const PB_text = require('./PBTexts.json');
 var PBChan = {};
 
 var supportedGames = [
-  {'name':'Banjo-Kazooie', 'id': '9dokge1p','last_verified': {}},
-  {'name':'Banjo-Tooie', 'id': 'm1m7pp12', 'last_verified': {}},
-  {'name':'Banjo-Kazooie: Nuts & Bolts', 'id':'3dxze41y', 'last_verified': {}},
-  {'name':'Banjo-Kazooie: Grunty\'s Revenge', 'id':'yd47epde','last_verified':{}},
-  {'name':'Banjo-Pilot', 'id':'k6q9rm1g','last_verified':{}}
+  {'name':'Banjo-Kazooie', 'nickname':'bk', 'id': '9dokge1p', 'last_verified': {}},
+  {'name':'Banjo-Tooie', 'nickname':'bt', 'id': 'm1m7pp12', 'last_verified': {}},
+  {'name':'Banjo-Kazooie: Nuts & Bolts', 'nickname':'n&b', 'id':'3dxze41y', 'last_verified': {}},
+  {'name':'Banjo-Kazooie: Grunty\'s Revenge', 'nickname':'gr', 'id':'yd47epde','last_verified':{}},
+  {'name':'Banjo-Pilot', 'nickname':'pilot', 'id':'k6q9rm1g','last_verified':{}}
 ];
 
 //hardcoded list of mods that want to be messaged, converting their speedrun.com username into a Discord ID
@@ -159,70 +159,80 @@ var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
       });
       config.bk_mods.currMod++;
       config.bk_mods.currMod %= mods.length;
-      fs.writeFileSync('./config.json',JSON.stringify(config));
+      fs.writeFileSync('./config.json',JSON.stringify(config, null, 2));
     }
   })
   .catch(console.error);
 });
 }
 
-/* */
+
+function revertPBs(cur_game, n){
+    speedrun_com.get('/runs',{
+        params:{
+            game: cur_game.id,
+            status: 'verified',
+            orderby: 'verify-date',
+            direction: 'desc'
+        }
+    }).then((response) => {
+        const runs = response.data.data;
+        cur_game.last_verified = Date.parse(runs[n].status['verify-date']);
+	console.log(cur_game.name, ' ', cur_game.last_verified);
+    });
+}
+
 function announce_run(run, cur_game, channel){
-    axios.get(run.links[0].uri,{
-        params:{embed: 'game,category,players'}
-    }).then( (response) => {
-                  const game_data = response.data.data.game.data;
-		  const cat_data = response.data.data.category.data;
-                  const plyr_data = response.data.data.players.data;
-		  const cat_name = game_data.names.international + ' ' + cat_data.name; 
-	          var plyr_name = (plyr_data[0].names === undefined) ? plyr_data[0].name : plyr_data[0].names.international;
-		  for(var i = 1; i < plyr_data.length - 1; i++){	
-		      plyr_name += ', ' + ((plyr_data[i].names === undefined) ? plyr_data[i].name : plyr_data[0].names.international);
-		  }
-		  if(plyr_data.length > 2) 
-		      plyr_name += ', ';
-		  if(plyr_data.length > 1) 
-		      plyr_name += '& ' + ((plyr_data[plyr_data.length-1].name === undefined) ? plyr_data[plyr_data.length-1].name : plyr_data[plyr_data.length-1].names.international);
+    axios.get(run.links[0].uri,{ params:{embed: 'game,category,players'}})
+        .then( (response) => {
+            const game_data = response.data.data.game.data;
+	    const cat_data = response.data.data.category.data;
+            const plyr_data = response.data.data.players.data;
+	    const cat_name = game_data.names.international + ' ' + cat_data.name; 
+	    var plyr_name = (plyr_data[0].names === undefined) ? plyr_data[0].name : plyr_data[0].names.international;
+	    for(var i = 1; i < plyr_data.length - 1; i++){	
+	        plyr_name += ', ' + ((plyr_data[i].names === undefined) ? plyr_data[i].name : plyr_data[0].names.international);
+	    }
+	    if (plyr_data.length > 2) plyr_name += ', ';
+	    if(plyr_data.length > 1) 
+	        plyr_name += '& ' + ((plyr_data[plyr_data.length-1].name === undefined) ? plyr_data[plyr_data.length-1].name : plyr_data[plyr_data.length-1].names.international);
 
-                  const time = moment.duration(response.data.data.times.primary)._data;
-		  var timeStr = '';
-                  if(time.hours != 0){
-                      timeStr = timeStr + time.hours + ':';
-                      if(time.minutes < 10)
-                          timeStr = timeStr + '0';
-                  }
-                  timeStr = timeStr + time.minutes + ':';
-                  if(time.seconds < 10){
-                      timeStr = timeStr + '0';
-                  }
-                  timeStr = timeStr + time.seconds;
+            const time = moment.duration(response.data.data.times.primary)._data;
+	    var timeStr = '';
+            if(time.hours != 0){
+              timeStr = timeStr + time.hours + ':';
+                if(time.minutes < 10) timeStr = timeStr + '0';
+            }
+            timeStr = timeStr + time.minutes + ':';
+            if(time.seconds < 10) timeStr = timeStr + '0';
+            timeStr = timeStr + time.seconds;
                   
-		  //baseGame should allow romhacks to use another game's PB texts
-                  const gameName = (cur_game.base_game) ? cur_game.base_game : cur_game.name; 
+	    //baseGame should allow romhacks to use another game's PB texts
+            const gameName = (cur_game.base_game) ? cur_game.base_game : cur_game.name; 
            
-        const stringIndex = Math.floor(Math.random()*(PB_text[gameName].data.length));
-	const pb_msg = PB_text[gameName].data[stringIndex];
+            const stringIndex = Math.floor(Math.random()*(PB_text[gameName].data.length));
+	    const pb_msg = PB_text[gameName].data[stringIndex];
 
-	if(config.mode === 'local'){
+	    if(config.mode === 'local'){
 		console.log(pb_msg.author);
 		console.log(response.data.data.weblink);
 		console.log(pb_msg.description);
 		console.log(`${plyr_name} got a ${timeStr} in ${cat_name}!`);
 		console.log(pb_msg.field.description + '\n');
-	} else {
-	    var embed = new Discord.RichEmbed()
-                .setAuthor(pb_msg.author.name,pb_msg.author.image)
-                .setTitle(response.data.data.weblink)
-                .setDescription(pb_msg.description)
-                .addField(`${plyr_name} got a ${timeStr} in ${cat_name}!`,pb_msg.field.description);
-            if(config.mode === 'final'){
-	    	PBChan.send({embed});
 	    } else {
-                var pb = PBChan.send({embed});
-	        pb.delete({timeout:30000});
+	        var embed = new Discord.RichEmbed()
+                    .setAuthor(pb_msg.author.name,pb_msg.author.image)
+                    .setTitle(response.data.data.weblink)
+                    .setDescription(pb_msg.description)
+                    .addField(`${plyr_name} got a ${timeStr} in ${cat_name}!`,pb_msg.field.description);
+	    	if(config.mode === 'final'){
+		    PBChan.send({embed})
+		}
+		else{
+		    PBChan.send({embed}).then(rply => rply.delete({timeout: 30000}));
+		}
 	    }
-	}
-    }).catch(console.error);	
+        }).catch(console.error);	
 }
 
 function checkForPBs(){
@@ -239,10 +249,12 @@ function checkForPBs(){
           const new_runs = response.data.data.filter((run) => {
 		return  Date.parse(run.status['verify-date']) > cur_game.last_verified;
 	  });
+	  if(new_runs.length === 0) return;
 	  const run_func = (run) => announce_run(run, cur_game);
 	  new_runs.forEach(run_func);
-          const ver_dates = new_run.map( x => Date.parse(x.status['verify-date']));
+          const ver_dates = new_runs.map( x => Date.parse(x.status['verify-date']));
           cur_game.last_verified = ver_dates.reduce((max, cur) => Math.max(max,cur), cur_game.last_verified);
+	  console.log(cur_game.name , cur_game.last_verified);
       }).catch(console.error);
   });//forEach game
 }
@@ -309,7 +321,18 @@ process.stdin.on('data', (chunk) => {
           });
 
           break;
-        default:
+	case "revert_pbs":
+            const game_short = args.shift();
+	    const rev_game = supportedGames.filter((x) => {return (x.nickname === game_short)});
+	    if(rev_game.length > 0){
+            	let n = args.shift();
+            	revertPBs(rev_game[0], n);
+	    }
+            break;
+        case "check_pbs":
+            checkForPBs();
+            break;
+	default:
           break;
       }
 });
