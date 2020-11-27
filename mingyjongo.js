@@ -78,6 +78,13 @@ client.on('message', (message) => {
 	  console.log("Ping Recieved!");
           message.channel.send('pong!');
           break;
+        case "announce_pb":
+          var game_arg = args.shift();
+          const rev_game = supportedGames.filter((x) => {return (x.nickname === game_arg)});
+	    if(rev_game.length > 0){
+            	let n = args.shift();
+            	revertPBs(rev_game[0], n);
+          break;
         case "test_bk_mod":
           srcom.getGameMods('9dokge1p')
           .then(function(mods){
