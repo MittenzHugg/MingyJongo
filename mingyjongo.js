@@ -84,7 +84,8 @@ client.on('message', (message) => {
 	    if(rev_game.length > 0){
             	let n = args.shift();
             	revertPBs(rev_game[0], n);
-          break;
+	    }
+	  break;
         case "test_bk_mod":
           srcom.getGameMods('9dokge1p')
           .then(function(mods){
