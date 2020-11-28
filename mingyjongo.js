@@ -39,7 +39,6 @@ var supportedGames = [
 //modsToMessage[
 var modsToMessage = {'Azmi':'184166863092187136','The8bitbeast':'140431496832876544',
                     'Mittenz':'103188396129677312'};
-
 //DISCORD
 client.on('ready', () => {
     //find last verified runs
@@ -259,7 +258,7 @@ function checkForPBs(){
 	  });
 	  if(new_runs.length === 0) return;
 	  const run_func = (run) => announce_run(run, cur_game);
-	  new_runs.forEach(run_func);
+	  new_runs.forEach((run) => srcom.isPB(run.id).then((x) => {if(x === true) announce_run(run,cur_game);}));
           const ver_dates = new_runs.map( x => Date.parse(x.status['verify-date']));
           cur_game.last_verified = ver_dates.reduce((max, cur) => Math.max(max,cur), cur_game.last_verified);
 	  console.log(cur_game.name , cur_game.last_verified);
@@ -346,23 +345,36 @@ process.stdin.on('data', (chunk) => {
 });
 
 srcom = {
-  getGameMods: function(gameID){
-    return speedrun_com.get('/games/' + gameID, {
-      params: {
-      }
-    })
-    .then(function (gameResp) {
-      return Object.keys(gameResp.data.data.moderators);
-    });
-  },
+    getGameMods: function(gameID){
+        return speedrun_com.get('/games/' + gameID, {params: {}})
+            .then(gameResp => Object.keys(gameResp.data.data.moderators));
+    },
 
-  getUserName: function(userID){
-    return speedrun_com.get('/users/' + userID, {
-      params: {
-      }
-    })
-    .then(function (userResp) {
-      return userResp.data.data.names.international;
-    });
-  }
+    getUserName: function(userID){
+        return speedrun_com.get('/users/' + userID, {params: {}})
+            .then(userResp => userResp.data.data.names.international);
+    },
+    
+    getUserPBs: function(userID, gameID){
+        return speedrun_com.get('/users/' + userID + '/personal-bests', {params:{game:gameID}})
+	    .then(resp => resp.data.data.map(x => x.run));
+    },
+    
+    isPB: function(runID){
+        return speedrun_com.get('/runs/' + runID, {params:{}})
+            .then((resp) => {
+                let plyrs = resp.data.data.players;
+		let game = resp.data.data.game;
+		return plyrs.map((plyr) => {
+		    return srcom.getUserPBs(plyr.id, game)
+		        .then((pb_runs) => {
+		            let pb_ids = pb_runs.map((x) => {return x.id});
+			    return pb_ids.includes(runID);
+		    });
+		});
+            })
+	    .then((resp) => {
+		    return Promise.all(resp).then((x) => {return x.includes(true);});
+	    });
+    }
 }
