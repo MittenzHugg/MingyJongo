@@ -331,7 +331,7 @@ process.stdin.on('data', (chunk) => {
             const mod_short = args.shift();
             const mod_game = supportedGames.find((x) => {return (x.nickname === mod_short)});
 	    if(!(mod_game === undefined)){
-            	PBchan.send(Promise.all(log_mods(mod_game))).delete({timeout:30000});
+            	PBChan.send(Promise.all(log_mods(mod_game)));
 	    }
 
             break;
