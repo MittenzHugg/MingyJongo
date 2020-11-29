@@ -113,6 +113,7 @@ client.on('message', (message) => {
 function log_mods(cur_game){
     return srcom.getGameMods(cur_game.id).then((src_mods) => {
         var o_str = 'The moderators for ' + cur_game.name + ' are:\n';
+	PBChan.send(o_str);
 	var info = src_mods.map((x) => {
             var mod_info = leaderboard_mods.find((mod) =>  {return mod.src_id === x});
 	    if(mod_info === undefined){
@@ -123,6 +124,7 @@ function log_mods(cur_game){
                 fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
 	    }
 	    usr_str = '' + x + ': ' + mod_info.name + ' ' + '\n';
+	    PBChan.send(usr_str);
 	    if(mod_info.ignore) return (usr_str + '!IGNORED\n');
 
 	if(mod_info.discord_id === undefined){
