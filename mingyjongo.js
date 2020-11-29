@@ -329,6 +329,7 @@ process.stdin.on('data', (chunk) => {
             break;
         case "list_mods":
             const mod_short = args.shift();
+	    PBChan.send('looking up ' + mod_short  + 'mods\n');
             const mod_game = supportedGames.find((x) => {return (x.nickname === mod_short)});
 	    if(!(mod_game === undefined)){
             	PBChan.send(Promise.all(log_mods(mod_game)));
