@@ -1,0 +1,30 @@
+[ 
+  { "name":"Mittenz",
+    "src_id":"dx355v2j",
+    "discord_id":"103188396129677312",
+    "time":21,
+    "ignore":false
+  },
+  { "name":"The8bitbeast",
+    "src_id":"pj0nrw98",
+    "discord_id":"140431496832876544",
+    "time":21,
+    "ignore":false
+  },
+  { "name":"Azmi",
+    "src_id":"5j5rl3nx",
+    "discord_id":"184166863092187136",
+    "time":21,
+    "ignore":false
+  },
+  { "name":"oxylen",
+    "src_id":"v816vv3x",
+    "time":21,
+    "ignore":false
+  },
+  { "name":"7hornet",
+    "src_id":"18vk3zej",
+    "time":21,
+    "ignore":false
+  }
+]

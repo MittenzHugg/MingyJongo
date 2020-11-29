@@ -26,33 +26,17 @@ const PB_text = require('./PBTexts.json');
 
 var PBChan = {};
 
-var supportedGames = [
-  {'name':'Banjo-Kazooie', 'nickname':'bk', 'id': '9dokge1p', 'last_verified': {}},
-  {'name':'Banjo-Tooie', 'nickname':'bt', 'id': 'm1m7pp12', 'last_verified': {}},
-  {'name':'Banjo-Kazooie: Nuts & Bolts', 'nickname':'n&b', 'id':'3dxze41y', 'last_verified': {}},
-  {'name':'Banjo-Kazooie: Grunty\'s Revenge', 'nickname':'gr', 'id':'yd47epde','last_verified':{}},
-  {'name':'Banjo-Pilot', 'nickname':'pilot', 'id':'k6q9rm1g','last_verified':{}}
-];
-
+var supportedGames = require('./games.json');
+var leaderboard_mods = require('./mods.json');
 //hardcoded list of mods that want to be messaged, converting their speedrun.com username into a Discord ID
-//add or remove as necessary
-//modsToMessage[
-var modsToMessage = {'Azmi':'184166863092187136','The8bitbeast':'140431496832876544',
-                    'Mittenz':'103188396129677312'};
+
 //DISCORD
 client.on('ready', () => {
     //find last verified runs
     PBChan = client.channels.find(r => r.name === config.discord.PB_channel.name);
     supportedGames.forEach((cur_game) => {
-        speedrun_com.get('/runs',{
-            params:{
-                game: cur_game.id,
-                status:'verified',
-                orderby: 'verify-date',
-                direction: 'desc'
-            }
-        }).then((response) => {
-	    cur_game.last_verified = Date.parse(response.data.data[0].status['verify-date']);
+	srcom.getVerifiedRuns(cur_game).then((response) => {
+	    cur_game.last_verified = Date.parse(response[0].status['verify-date']);
         }).catch(console.error);
     });
 });
@@ -105,6 +89,7 @@ client.on('message', (message) => {
               if(discord_user){
                 message.channel.send("messaging " + username);
                 console.log(discord_user);
+//??? from here until ???END lines may have been inserted/deleted
                 discord_user.send('Bzzarrgh! Foolish bear, this is just a test of the verify runs DM system linking you to https://www.speedrun.com/runsawaitingverification');
               }
               else{
@@ -122,29 +107,93 @@ client.on('message', (message) => {
       console.log('Command not sent by Mittenz');
     }
   }
-  else{
-    console.log('Command not sent in private_thoughts');
-  }
 });
 }
 
-if(!(config.mode==='local')){
-//NOTIFY BK MOD TO CHECK SR.COM
-var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
-  console.log('Checking for runs to verify');
-  speedrun_com.get('/runs', {
-    params: {
-      game: '9dokge1p',
-      status: 'new'
-    }
-  })
-  .then(function (response) {
-    if(response.data.pagination.size != 0){
-      var tempStr = 's';
-      if(response.data.pagination.size == 1){
-        tempStr = ''
-      }
+function log_mods(cur_game){
+    return srcom.getGameMods(cur_game.id).then((src_mods) => {
+        var o_str = 'The moderators for ' + cur_game.name + ' are:\n';
+	var info = src_mods.map((x) => {
+            var mod_info = leaderboard_mods.find((mod) =>  {return mod.src_id === x});
+	    if(mod_info === undefined){
+                //create new mod  
+	        let usr_name = Promise.all(srcom.getUserName(x));
+                mod_info = {"name": usr_name, "src_id": cur_mod, "time": 21, "ignore":false};
+                leaderboard_mods.push(mod_info);
+                fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
+	    }
+	    usr_str = '' + x + ': ' + mod_info.name + ' ' + '\n';
+	    if(mod_info.ignore) return (usr_str + '!IGNORED\n');
 
+	if(mod_info.discord_id === undefined){
+	    var possible_users = client.users.cache.filter((y) => {return (y.username === mod_info.name);});
+	    if(possible_users.length == 0) return (usr_str + 'CAN\'T FIND DISCORD\n');
+	    if(possible_users.length > 1) {
+                usr_str += '!MULTIPLE OPTIONS:';
+		for (let usr of possible_users.values()){
+                    usr_str += ' ' + usr.discriminator;
+		}
+		return usr_str + '\n'
+	    }
+	    mod_info.discord_id = possible_users.values().next().id;
+            fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
+	}
+	
+        return usr_str + client.users.fetch(mod_info.discord_id).discriminator  + " @ " + mod_info.time + ":00\n"; //*/
+    }).reduce((acc,str) => {return acc + str},o_str);
+    return info;
+    });
+}
+function check_awaiting_verification(){
+    supportedGames.forEach((cur_game)=>{
+        srcom.getNewRuns(cur_game).then((new_runs)=>{
+		if(new_runs.length === 0) return;
+		var tempStr = (new_runs.length === 1) ? '' : 's' ;
+
+		//get game's mods from SRC
+		const src_mods = srcom.getGameMods(cur_game);
+                var iMod =  cur_game.current_mod % src_mods.length;
+		var cur_mod = src_mods[iMod];
+		var mod_info;
+                var i = 0;
+		do{
+		    cur_mod = src_mods[(iMod + i)%src_mods.length];
+		    mod_info = leaderboard_mods.find((x) => {return (x.src_id === cur_mod)});
+		    if(mod_info === undefined){
+		        //create new mod
+		        mod_info = {"name":  srcom.get_username(cur_mod), "src_id": cur_mod, "time": 21, "ignore":false};
+		        leaderboard_mods.push(mod_info);
+                        fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
+		    }else if(mod_info.ignore){
+			if(i === src_mods.length) return; //all mods set to ignore
+			i++; //select next mod;
+
+		    }
+		    i = (i+1) %src_mods.length;
+		    //if(i === ) return; //NO MESSAGABLE MODS
+		}
+		while(mod_info.ignore);
+
+		if(mod_info.discord_id === undefined){
+                    //search client for discord_id
+		    //if find 1
+		    //else
+		}
+		else{
+                    //message mod
+
+		}
+
+		//reschedule for tomorrow's mod
+
+	});
+    });
+    //checking for runs needing verification
+}
+
+/*
+if(!(config.mode==='local')){
+var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
       //find game mods
       var todaysMod = config.bk_mods.currMod;
       srcom.getGameMods('9dokge1p')
@@ -171,19 +220,11 @@ var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
   })
   .catch(console.error);
 });
-}
+}*/
 
 
 function revertPBs(cur_game, n){
-    speedrun_com.get('/runs',{
-        params:{
-            game: cur_game.id,
-            status: 'verified',
-            orderby: 'verify-date',
-            direction: 'desc'
-        }
-    }).then((response) => {
-        const runs = response.data.data;
+    srcom.getVerifiedPBs(cur_game).then((runs) => {
         cur_game.last_verified = Date.parse(runs[n].status['verify-date']);
 	console.log(cur_game.name, ' ', cur_game.last_verified);
     });
@@ -245,15 +286,8 @@ function announce_run(run, cur_game, channel){
 function checkForPBs(){
   supportedGames.forEach( (cur_game) => {
       var numberNewRuns = 0;  
-      speedrun_com.get('/runs',{
-          params:{
-              game: cur_game.id,
-              status: 'verified',
-              orderby: 'verify-date',
-              direction: 'desc'
-          }
-      }).then((response) => {
-          const new_runs = response.data.data.filter((run) => {
+      srcom.getVerifiedRuns(cur_game).then((response) => {
+          const new_runs = response.filter((run) => {
 		return  Date.parse(run.status['verify-date']) > cur_game.last_verified;
 	  });
 	  if(new_runs.length === 0) return;
@@ -272,6 +306,7 @@ if(config.mode === 'final')
 if(!(config.mode === 'local'))
     client.login(sensitive.discord.token);
 
+if(!(config.mode === 'final'))
 process.stdin.on('data', (chunk) => {
       const message = chunk.toString().trim() 
 
@@ -286,48 +321,20 @@ process.stdin.on('data', (chunk) => {
 	case "announce_pbs":
             supportedGames.forEach( (cur_game) => {
                 console.log(cur_game.name);
-		speedrun_com.get('/runs',{
-                    params:{
-                        game: cur_game.id,
-                        status: 'verified',
-                        orderby: 'verify-date',
-                        direction: 'desc'
-                    }
-                }).then((response) => {
-	            const new_run = response.data.data[0];
-	            announce_run(new_run, cur_game);
+		srcom.getVerifiedRuns(cur_game.id)
+	            .then((new_runs) => {
+	            announce_run(new_runs[0], cur_game);
                 }).catch(console.error);
 	    });
             break;
-        case "test_bk_mod":
-          srcom.getGameMods('9dokge1p')
-          .then(function(mods){
-            var todaysMod = args.shift()%mods.length;
-            console.log(config.bk_mods.currMod);
-            todaysMod %= mods.length
-            srcom.getUserName(mods[todaysMod])
-            .then(function(username){
-              if(modsToMessage[username]){
-                  discord_user = client.users.get(modsToMessage[username]);
-              }
-              else{
-                  discord_user = client.users.find(r => r.username === username);
-                  modsToMessage[username] = discord_user.id;
-                  // ToDo : store modsToMessage in .json 
-              }
-              
-              if(discord_user){
-                message.channel.send("messaging " + username);
-                console.log(discord_user);
-                discord_user.send('Bzzarrgh! Foolish bear, this is just a test of the verify runs DM system linking you to https://www.speedrun.com/runsawaitingverification');
-              }
-              else{
-                message.channel.send("Could not find discord user " + username);
-              }
-            });
-          });
+        case "list_mods":
+            const mod_short = args.shift();
+            const mod_game = supportedGames.find((x) => {return (x.nickname === mod_short)});
+	    if(!(mod_game === undefined)){
+            	PBchan.send(Promise.all(log_mods(mod_game))).delete({timeout:30000});
+	    }
 
-          break;
+            break;
 	case "revert_pbs":
             const game_short = args.shift();
 	    const rev_game = supportedGames.filter((x) => {return (x.nickname === game_short)});
@@ -359,7 +366,19 @@ srcom = {
         return speedrun_com.get('/users/' + userID + '/personal-bests', {params:{game:gameID}})
 	    .then(resp => resp.data.data.map(x => x.run));
     },
-    
+
+    getVerifiedRuns: function(gameID){
+	return speedrun_com.get('/runs',{
+            params:{ game: gameID, status: 'verified',
+                     orderby: 'verify-date', direction: 'desc'}
+            }).then((response) => {return response.data.data;});
+    },
+
+    getNewRuns: function(gameID){
+        return speedrun_com.get('/runs', {params:{game: gameID, status: 'new'}})
+	    .then((resp) => {return resp.data.data;});
+    },
+
     isPB: function(runID){
         return speedrun_com.get('/runs/' + runID, {params:{}})
             .then((resp) => {
