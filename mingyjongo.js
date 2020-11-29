@@ -126,6 +126,7 @@ function log_mods(cur_game){
 	    if(mod_info.ignore) return (usr_str + '!IGNORED\n');
 
 	if(mod_info.discord_id === undefined){
+	    return usr_str + '!DISCORD INFO NOT DEFINED\n';
 	    var possible_users = client.users.cache.filter((y) => {return (y.username === mod_info.name);});
 	    if(possible_users.length == 0) return (usr_str + 'CAN\'T FIND DISCORD\n');
 	    if(possible_users.length > 1) {
@@ -329,7 +330,6 @@ process.stdin.on('data', (chunk) => {
             break;
         case "list_mods":
             const mod_short = args.shift();
-	    PBChan.send('looking up ' + mod_short  + 'mods\n');
             const mod_game = supportedGames.find((x) => {return (x.nickname === mod_short)});
 	    if(!(mod_game === undefined)){
             	PBChan.send(Promise.all(log_mods(mod_game)));
