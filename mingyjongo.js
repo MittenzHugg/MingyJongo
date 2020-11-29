@@ -124,7 +124,6 @@ function log_mods(cur_game){
                 fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
 	    }
 	    usr_str = '' + x + ': ' + mod_info.name + ' ' + '\n';
-	    PBChan.send(usr_str);
 	    if(mod_info.ignore) return (usr_str + '!IGNORED\n');
 
 	if(mod_info.discord_id === undefined){
@@ -142,7 +141,10 @@ function log_mods(cur_game){
             fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
 	}
 	
-        return usr_str + client.users.fetch(mod_info.discord_id).discriminator  + " @ " + mod_info.time + ":00\n"; //*/
+	PBChan.send(usr_str);
+        usr_str += client.users.fetch(mod_info.discord_id).discriminator  + " @ " + mod_info.time + ":00\n"; //*/
+	 PBChan.send(usr_str);
+        return usr_str;
     }).reduce((acc,str) => {return acc + str},o_str);
     return info;
     });
