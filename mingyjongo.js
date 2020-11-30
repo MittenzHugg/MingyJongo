@@ -71,7 +71,7 @@ client.on('message', (message) => {
             	revertPBs(rev_game[0], n);
 	    }
 	  break;
-        case "test_bk_mod":
+	case "test_bk_mod":
           srcom.getGameMods('9dokge1p')
           .then(function(mods){
             var todaysMod = args.shift()%mods.length;
@@ -104,9 +104,6 @@ client.on('message', (message) => {
         default:
           break;
       }
-    }
-    else{
-      console.log('Command not sent by Mittenz');
     }
   }
 });
@@ -150,83 +147,64 @@ function log_mods(cur_game){
     });
 }
 
-function check_awaiting_verification(){
-    supportedGames.forEach((cur_game)=>{
-        srcom.getNewRuns(cur_game).then((new_runs)=>{
-		if(new_runs.length === 0) return;
-		var tempStr = (new_runs.length === 1) ? '' : 's' ;
-
-		//get game's mods from SRC
-		const src_mods = srcom.getGameMods(cur_game);
-                var iMod =  cur_game.current_mod % src_mods.length;
-		var cur_mod = src_mods[iMod];
-		var mod_info;
-                var i = 0;
-		do{
-		    cur_mod = src_mods[(iMod + i)%src_mods.length];
-		    mod_info = leaderboard_mods.find((x) => {return (x.src_id === cur_mod)});
-		    if(mod_info === undefined){
-		        //create new mod
-		        mod_info = {"name":  srcom.get_username(cur_mod), "src_id": cur_mod, "time": 21, "ignore":false};
-		        leaderboard_mods.push(mod_info);
-                        fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-		    }else if(mod_info.ignore){
-			if(i === src_mods.length) return; //all mods set to ignore
-			i++; //select next mod;
-
-		    }
-		    i = (i+1) %src_mods.length;
-		    //if(i === ) return; //NO MESSAGABLE MODS
+function check_awaiting_verification(cur_game){
+    srcom.getNewRuns(cur_game.id).then((new_runs)=>{	
+        if(config.mode === 'final'){if(new_runs.length === 0) return;}
+        srcom.getGameMods(cur_game.id).then((src_mods) => {
+        var iMod =  cur_game.current_mod % src_mods.length;
+	var cur_mod = src_mods[iMod];
+	var mod_info;
+        var i = 0;
+	do{
+	    cur_mod = src_mods[(iMod + i)%src_mods.length];
+	    mod_info = get_mod_info(cur_mod);
+	    if(mod_info == null || mod_info.discord_id == null || mod_info.ignore){
+	        console.log('Couldn\'t find ' + cur_game.name + ' mod' + (iMod + i)%src_mods.length);
+                i++;
+	        if(i === src_mods.length){
+                    console.log('NO MODS CAN BE MESSAGED FOR ' + cur_game.name.toUpperCase());
+		    return; //NO MESSAGABLE MODS
 		}
-		while(mod_info.ignore);
+	    }
+	} while(mod_info == null || mod_info.discord_id == null || mod_info.ignore);
+        
+	//send_msg
+	console.log('Messaging ' + mod_info.name + ' about ' + new_runs.length + ' new runs');
+	if(config.mode === 'final'){
+        client.users.fetch(mod_info.discord_id).then((d_usr) => {
+	    d_usr.send('Bzzarrgh! Foolish bear, why have you not checked Speedrun.com today? A few more shocks from my stick seem necessary to get you to check the ' + new_runs.length + ' run'+ ((new_runs.length === 1)?'':'s')  + ' waiting to be verified...\n https://www.speedrun.com/runsawaitingverification');
+    	});
+	}
 
-		if(mod_info.discord_id === undefined){
-                    //search client for discord_id
-		    //if find 1
-		    //else
+	var jMod = (iMod + i + 1)%src_mods.length;
+	var next_mod = cur_mod;
+	i = 0;
+	do{
+	    next_mod = src_mods[(jMod + i)%src_mods.length];
+	    mod_info = get_mod_info(next_mod);
+	    if(mod_info == null || mod_info.discord_id == null || mod_info.ignore){
+	        console.log('Couldn\'t find ' + cur_game.name + ' mod' + (jMod + i)%src_mods.length);
+                i++;
+	        if(i === src_mods.length){
+                    console.log('NO MODS CAN BE MESSAGED FOR ' + cur_game.name.toUpperCase());
+		    return; //NO MESSAGABLE MODS
 		}
-		else{
-                    //message mod
-
-		}
-
-		//reschedule for tomorrow's mod
-
-	});
+	    }
+	} while(mod_info == null || mod_info.discord_id == null || mod_info.ignore);
+        //reschedule event	
+	console.log('Setting time to ' + mod_info.time + ' for ' + mod_info.name);
+	mod_reminder[cur_game.id].reschedule('00 00 ' + next_mod.time + ' * * *');
+	cur_game.current_mod = (jMod +i)%src_mods.length;
+	//supportedGames[supportedGames.findIndex((x) => x.id === cur_game.id)] = cur_game;
+	fs.writeFileSync('./games.json', JSON.stringify(supportedGames, null, 2));
     });
-    //checking for runs needing verification
+    });
 }
 
-/*
-if(!(config.mode==='local')){
-var bk_mod_reminder = schedule.scheduleJob('00 21 * * *', function(){
-      //find game mods
-      var todaysMod = config.bk_mods.currMod;
-      srcom.getGameMods('9dokge1p')
-      .then(function(mods){
-        console.log(config.bk_mods.currMod);
-        todaysMod %= mods.length
-        srcom.getUserName(mods[todaysMod])
-        .then(function(username){
-          discord_user = client.users.get(modsToMessage[username]);
-          if(discord_user){
-            //message.channel.send("messaging " + username);
-            //console.log(discord_user);
-            discord_user.send('Bzzarrgh! Foolish bear, why have you not checked Speedrun.com today? A few more shocks from my stick seem necessary to get you to check the ' + response.data.pagination.size + ' run'+ tempStr + ' waiting to be verified...\n https://www.speedrun.com/runsawaitingverification');
-          }
-          else{
-            //message.channel.send("Could not find discord user " + username);
-          }
-        });
-      });
-      config.bk_mods.currMod++;
-      config.bk_mods.currMod %= mods.length;
-      fs.writeFileSync('./config.json',JSON.stringify(config, null, 2));
-    }
-  })
-  .catch(console.error);
+var mod_reminder = {};
+supportedGames.forEach((cur_game) => {
+	mod_reminder[cur_game.id] = schedule.scheduleJob('00 00 21 * * *', ()=>{check_awaiting_verification(cur_game);});
 });
-}*/
 
 
 function revertPBs(cur_game, n){
@@ -353,6 +331,13 @@ process.stdin.on('data', (chunk) => {
         case "check_pbs":
             checkForPBs();
             break;
+        case "check_new":	
+            const check_short = args.shift();
+	    const check_game = supportedGames.find((x) => {return (x.nickname === check_short)});
+	    if(check_game != null){ 
+		console.log(check_game);
+                check_awaiting_verification(check_game);
+	    }
 	default:
           break;
       }
