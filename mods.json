@@ -1,30 +1,72 @@
-[ 
-  { "name":"Mittenz",
-    "src_id":"dx355v2j",
-    "discord_id":"103188396129677312",
-    "time":21,
-    "ignore":false
+[
+  {
+    "name": "Mittenz",
+    "src_id": "dx355v2j",
+    "discord_id": "103188396129677312",
+    "time": 21,
+    "ignore": false
   },
-  { "name":"The8bitbeast",
-    "src_id":"pj0nrw98",
-    "discord_id":"140431496832876544",
-    "time":21,
-    "ignore":false
+  {
+    "name": "The8bitbeast",
+    "src_id": "pj0nrw98",
+    "discord_id": "140431496832876544",
+    "time": 21,
+    "ignore": false
   },
-  { "name":"Azmi",
-    "src_id":"5j5rl3nx",
-    "discord_id":"184166863092187136",
-    "time":21,
-    "ignore":false
+  {
+    "name": "Azmi",
+    "src_id": "5j5rl3nx",
+    "discord_id": "184166863092187136",
+    "time": 21,
+    "ignore": false
   },
-  { "name":"oxylen",
-    "src_id":"v816vv3x",
-    "time":21,
-    "ignore":false
+  {
+    "name": "oxylen",
+    "src_id": "v816vv3x",
+    "discord_id": "399715723141971971",
+    "time": 21,
+    "ignore": false
   },
-  { "name":"7hornet",
-    "src_id":"18vk3zej",
-    "time":21,
-    "ignore":false
+  {
+    "name": "7hornet",
+    "src_id": "18vk3zej",
+    "discord_id": "282495861320187904",
+    "time": 21,
+    "ignore": false
+  },
+  {
+    "name": "Konditioner",
+    "src_id": "68wgw3xg",
+    "discord_id": "80485061887000576",
+    "time": 21,
+    "ignore": false
+  },
+  {
+    "name": "Pjii",
+    "src_id": "18q04ojn",
+    "discord_id": "109577304815992832",
+    "time": 21,
+    "ignore": false
+  },
+  {
+    "name": "g0goTBC",
+    "src_id": "48ge292j",
+    "discord_id": "112383128697344000",
+    "time": 21,
+    "ignore": false
+  },
+  {
+    "name": "Kongkrete",
+    "src_id": "98rpe6dj",
+    "discord_id": "85163513735024640",
+    "time": 21,
+    "ignore": false
+  },
+  {
+    "name": "Scykoh",
+    "src_id": "e8eg2px0",
+    "discord_id": "87000837951348736",
+    "time": 21,
+    "ignore": false
   }
 ]
