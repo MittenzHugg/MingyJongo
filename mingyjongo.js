@@ -112,97 +112,44 @@ client.on('message', (message) => {
 });
 }
 
+function get_mod_info(srcID){
+    var mod_info = leaderboard_mods.find(mod => mod.src_id === srcID);
+    if(!(mod_info == null)) return mod_info;
+  
+    //create new mod
+    return srcom.getUserName(srcID).then((src_info) => {
+        let mod_name = src_info;
+        return bk_guild.members.fetch({ query: src_info, limit: 1 }).then((m) => {
+            if(m == null || m.first() == null)  return null;
+	    
+	    let d_usr = m.first().user;
+	    //add user to mod list
+	    mod_info = {"name": src_info, "src_id":srcID, "discord_id":d_usr.id, "time":21, "ignore":false};
+	    leaderboard_mods.push(mod_info);
+            fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
+	    return mod_info;
+	});
+    });
+}
+
 function log_mods(cur_game){
     return srcom.getGameMods(cur_game.id).then((src_mods) => {
         return Promise.all(src_mods.map((x) => {
-            var mod_info = leaderboard_mods.find(mod => mod.src_id === x);
-	    if(mod_info == null){
-		//create new mod
-		return srcom.getUserName(x).then((src_info) => {
-		    let mod_name = src_info;
-		    return bk_guild.members.fetch({ query: src_info, limit: 1 }).then((m) => {
-			    if(m == null || m.first() == null) 
-				    return x + ' ' + src_info + ' !NOT FOUND IN DISCORD';
-			    else { 
-				    let d_usr = m.first().user;
-				    //add user to mod list
-				    mod_info = {"name": src_info, "src_id":x, "discord_id":d_usr.id, "time":21, "ignore":false};
-				    leaderboard_mods.push(mod_info);
-                                    fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-				    return x + ' ' + src_info + ' !NEW! ' + d_usr.tag + " @ " + mod_info.time + ':00';
-			    }
-		    });
-		});
-	    } else {
-                if(mod_info.ignore) return x + ' ' + mod_info.name + ' !SET TO IGNORE';
-		return client.users.fetch(mod_info.discord_id).then((d_usr) => {
-		    return mod_info.src_id + ' ' + mod_info.name + ' ' + d_usr.tag + ' @ ' + mod_info.time + ':00';
-		});
+            let mod_info =  get_mod_info(x);
+	    if(mod_info == null || mod_info.discord_id == null){
+                return srcom.getUserName(x).then((src_info) => {
+                    return x + ' ' + src_info + ' !NOT FOUND IN DISCORD';
+	        });
 	    }
-	}));
-	    //var o_str = 'The moderators for ' + cur_game.name + ' are:\n';
-        //return Promise.all(src_mods.map((x) => {
-            //var mod_info = leaderboard_mods[];
-	    //if(mod_info == null){
-                //add mod to leaderboard
-	    //}
-	    //return x;
-	//}).reduce((x) => ' ' + x));
-    });
-	/*return Promise.all(src_mods.map((x) => {
-	    //var mod_index;
-            var mod_info = leaderboard_mods.find((mod) =>  {return mod.src_id === x});
-	    if(mod_info === undefined){
-                //create new mod  
-	        let usr_name = Promise.all(srcom.getUserName(x));
-                mod_info = {"name": usr_name, "src_id": cur_mod, "time": 21, "ignore":false};
-                //mod_index = leaderboard_mods.length;
-		leaderboard_mods.push(mod_info);
-                //fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-	    }
-	    //else { mod_index = leaderboard_mods.findIndex(mod_info); }
-	    var usr_str = '' + x + ': ' + mod_info.name + ' ';
-	    if(mod_info.ignore) return (usr_str + '!IGNORED\n');
-
-	if(mod_info.discord_id === undefined){
-	    //return usr_str + '!DISCORD INFO NOT DEFINED\n';
-	    var discord_guild = client.guilds.find(x => x.name === "Banjo Speedrunning");
-	    if(discord_guild == null) return (usr_str + 'CAN\'T FIND GUILD\n');
-	    return discord_guild.fetchMembers(mod_info.name).then((r) => {
-		    var possible_users = r.members.array().map((s) => s.user);
-		    console.log(possible_users.length);
-		    console.log(possible_users.reduce((acc, arg) => {return acc + arg.username;}, ''));
-		    possible_users = possible_users.filter((s) => s.username === mod_info.name);
-		    if(possible_users.length === 0) {
-			    return usr_str + 'CAN\'T FIND USER\n'
-		    };
-		    if(possible_users.length > 1) {
-			    usr_str += 'MULTIPLE USERS:';
-		            return possible_users.reduce((acc, arg) => {return acc + arg.tag;}, usr_str);
-		    };
-		    mod_info.discord_id = possible_users[0].id;
-		    //leaderboard_mods[mod_index] = mod_info;
-                    //fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-		    return (usr_str + possible_users[0].tag + ' @ ' + mod_info.time + ':00\n');
+	    
+            if(mod_info.ignore) return x + ' ' + mod_info.name + ' !SET TO IGNORE';
+	    return client.users.fetch(mod_info.discord_id).then((d_usr) => {
+	        return mod_info.src_id + ' ' + mod_info.name + ' ' + d_usr.tag + ' @ ' + mod_info.time + ':00';
 	    });
-
-
-	    //if(discord_user == null) return (usr_str + 'CAN\'T FIND DISCORD\n');
-	    //console.log(discord_user.id);
-	    //if(possible_users.length > 1) {
-            //    usr_str += '!MULTIPLE OPTIONS:';
-	    //	for (let usr of possible_users.values()){
-            //        usr_str += ' ' + usr.tag;
-	    //	}
-	    	return usr_str + '\n'
-	    //}
-	    //mod_info.discord_id = possible_users.values().next().id;
-            //fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-	}
-	return client.fetchUser(mod_info.discord_id).then((d_usr) => {return (usr_str + d_usr.tag + ' @ ' + mod_info.time + ':00\n');});
-    })).then((info) => {return info.reduce((acc,str) => {return acc + str},o_str);});
-    });//*/
+	}));
+    });
 }
+
 function check_awaiting_verification(){
     supportedGames.forEach((cur_game)=>{
         srcom.getNewRuns(cur_game).then((new_runs)=>{
