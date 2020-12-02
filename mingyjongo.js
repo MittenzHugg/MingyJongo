@@ -155,13 +155,19 @@ function get_mod_info(srcID){
         return bk_guild.members.fetch({ query: src_info, limit: 1 }).then((m) => {
             if(m == null || m.first() == null)  return null;
         
-        let d_usr = m.first().user;
-        //add user to mod list
-        mod_info = {"name": src_info, "src_id":srcID, "discord_id":d_usr.id, "time":21, "ignore":false};
-        leaderboard_mods.push(mod_info);
+            let d_usr = m.first().user;
+            //add user to mod list
+            mod_info = {"name": src_info, "src_id":srcID, "discord_id":d_usr.id, "time":21, "ignore":false};
+            leaderboard_mods.push(mod_info);
             fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-        return mod_info;
-    });
+            
+	    client.users.fetch(mod_info.discord_id).then((d_usr) => {
+                d_usr.send('Hello, '+ mod_info.name + '. Mumbo has big surprise for you.');
+		d_usr.send('Har-har-harrr! Foolish bear, you fell straight into my trap! I\'m not that pathetic shaman you think I am! I\'m Mingy Jongo and your worthless quest to not moderate the banjo leaderboards ends here...\n\nOnce per day I check the leaderboards for new runs. If there are any waiting to be verified I message one moderator for the game. I rotate between moderators each time I send a message as to not over burden any one moderator with messages.\n\nBzzarrgh! Now that my elaborate disguise is ruined, here are some commands you can type here to help yourself against my evil cybotic-ness!:\n\t\`!time\` I tell you what time I plan the message you.\n\t\`!time <0-23>\` Sets what time I will message you\n\t\`!ignore\` I will stop messaging you.\n\t\`!remind\` I will stop ignoring you.\n\n As you see, there\'s no escape and resistance is futile!');
+	    });
+            
+            return mod_info;
+        });
     });
 }
 
@@ -169,17 +175,17 @@ function log_mods(cur_game){
     return srcom.getGameMods(cur_game.id).then((src_mods) => {
         return Promise.all(src_mods.map((x) => {
             let mod_info =  get_mod_info(x);
-        if(mod_info == null || mod_info.discord_id == null){
+            if(mod_info == null || mod_info.discord_id == null){
                 return srcom.getUserName(x).then((src_info) => {
                     return x + ' ' + src_info + ' !NOT FOUND IN DISCORD';
-            });
-        }
+                });
+            }
         
             if(mod_info.ignore) return x + ' ' + mod_info.name + ' !SET TO IGNORE';
-        return client.users.fetch(mod_info.discord_id).then((d_usr) => {
-            return mod_info.src_id + ' ' + mod_info.name + ' ' + d_usr.tag + ' @ ' + mod_info.time + ':00';
-        });
-    }));
+            return client.users.fetch(mod_info.discord_id).then((d_usr) => {
+                return mod_info.src_id + ' ' + mod_info.name + ' ' + d_usr.tag + ' @ ' + mod_info.time + ':00';
+            });
+        }));
     });
 }
 
@@ -196,19 +202,19 @@ function check_awaiting_verification(cur_game){
         mod_info = get_mod_info(cur_mod);
         if(mod_info == null || mod_info.discord_id == null || mod_info.ignore){
             console.log('Couldn\'t find ' + cur_game.name + ' mod' + (iMod + i)%src_mods.length);
-                i++;
+            i++;
             if(i === src_mods.length){
-                    console.log('NO MODS CAN BE MESSAGED FOR ' + cur_game.name.toUpperCase());
-            return; //NO MESSAGABLE MODS
-        }
-        }
+                console.log('NO MODS CAN BE MESSAGED FOR ' + cur_game.name.toUpperCase());
+                return; //NO MESSAGABLE MODS
+            }
+        }   
     } while(mod_info == null || mod_info.discord_id == null || mod_info.ignore);
         
     //send_msg
     console.log('Messaging ' + mod_info.name + ' about ' + new_runs.length + ' new runs');
     if(config.mode === 'final'){
             client.users.fetch(mod_info.discord_id).then((d_usr) => {
-            d_usr.send('Bzzarrgh! Foolish bear, why have you not checked Speedrun.com today? A few more shocks from my stick seem necessary to get you to check the ' + new_runs.length + ' run'+ ((new_runs.length === 1)?'':'s')  + ' waiting to be verified...\n https://www.speedrun.com/runsawaitingverification');
+            d_usr.send('Bzzarrgh! Foolish bear, why have you not checked Speedrun.com today? A few more shocks from my stick seem necessary to get you to check the ' + new_runs.length + ' run'+ ((new_runs.length === 1)?'':'s')  + ' waiting to be verified...\n https://www.speedrun.com/runsawaitingverification').then((msg) => msg.delete({timeout: 2*24*60*60*1000}));
         });
     }
 
