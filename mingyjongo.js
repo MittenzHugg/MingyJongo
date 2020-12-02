@@ -37,9 +37,12 @@ client.on('ready', () => {
     bk_guild = client.guilds.cache.find(r => r.name === "Banjo Speedrunning");
     PBChan = bk_guild.channels.cache.find(r => r.name === config.discord.PB_channel.name);
     supportedGames.forEach((cur_game) => {
-    srcom.getVerifiedRuns(cur_game).then((response) => {
-        cur_game.last_verified = Date.parse(response[0].status['verify-date']);
-        }).catch(console.error);
+        srcom.getVerifiedRuns(cur_game.id).then((response) => {
+            cur_game.last_verified = Date.parse(response[0].status['verify-date']);
+            fs.writeFileSync('./games.json', JSON.stringify(supportedGames, null, 2));
+            console.log(cur_game.name , cur_game.last_verified);
+	}).catch(console.error);
+	
     });
 });
 
@@ -297,7 +300,7 @@ function announce_run(run, cur_game, channel){
         console.log(`${plyr_name} got a ${timeStr} in ${cat_name}!`);
         console.log(pb_msg.field.description + '\n');
         } else {
-            var embed = new Discord.RichEmbed()
+            var embed = new Discord.MessageEmbed()
                     .setAuthor(pb_msg.author.name,pb_msg.author.image)
                     .setTitle(response.data.data.weblink)
                     .setDescription(pb_msg.description)
@@ -315,10 +318,10 @@ function announce_run(run, cur_game, channel){
 function checkForPBs(){
   supportedGames.forEach( (cur_game) => {
       var numberNewRuns = 0;  
-      srcom.getVerifiedRuns(cur_game).then((response) => {
+      srcom.getVerifiedRuns(cur_game.id).then((response) => {
           const new_runs = response.filter((run) => {
-        return  Date.parse(run.status['verify-date']) > cur_game.last_verified;
-      });
+            return  Date.parse(run.status['verify-date']) > cur_game.last_verified;
+          });
       if(new_runs.length === 0) return;
       const run_func = (run) => announce_run(run, cur_game);
       new_runs.forEach((run) => srcom.isPB(run.id).then((x) => {if(x === true) announce_run(run,cur_game);}));
