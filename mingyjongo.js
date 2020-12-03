@@ -193,12 +193,13 @@ function log_mods(cur_game){
 }
 
 function check_awaiting_verification(cur_game){
+    console.log("Checking for new " +cur_game.name + "runs");
     srcom.getNewRuns(cur_game.id).then((new_runs)=>{    
-        if(config.mode === 'final'){if(new_runs.length === 0) return;}
+        if((config.mode === 'final')&&(new_runs.length === 0)) return;
         srcom.getGameMods(cur_game.id).then((src_mods) => {
         var iMod =  cur_game.current_mod % src_mods.length;
-    var cur_mod = src_mods[iMod];
-    var mod_info;
+        var cur_mod = src_mods[iMod];
+        var mod_info;
         var i = 0;
     do{
         cur_mod = src_mods[(iMod + i)%src_mods.length];
@@ -255,7 +256,7 @@ supportedGames.forEach((cur_game) => {
 
 
 function revertPBs(cur_game, n){
-    srcom.getVerifiedPBs(cur_game).then((runs) => {
+    srcom.getVerifiedRuns(cur_game.id).then((runs) => {
         cur_game.last_verified = Date.parse(runs[n].status['verify-date']);
     console.log(cur_game.name, ' ', cur_game.last_verified);
     });
@@ -263,6 +264,7 @@ function revertPBs(cur_game, n){
 
 
 function announce_run(run, cur_game, channel){
+    console.log('Announcing run ' + run + ' for ' + cur_game.name);
     axios.get(run.links[0].uri,{ params:{embed: 'game,category,players'}})
         .then( (response) => {
             const game_data = response.data.data.game.data;
@@ -309,20 +311,25 @@ function announce_run(run, cur_game, channel){
             PBChan.send({embed})
         }
         else{
-            PBChan.send({embed}).then(rply => rply.delete({timeout: 30000}));
+            PBChan.send({embed}).then(rply => setTimeout(() => rply.delete(), 15*1000));
         }
         }
         }).catch(console.error);    
 }
 
 function checkForPBs(){
-  supportedGames.forEach( (cur_game) => {
+    console.log('Checking for PBS');
+    supportedGames.forEach( (cur_game) => {
       var numberNewRuns = 0;  
       srcom.getVerifiedRuns(cur_game.id).then((response) => {
+	  console.log(cur_game.name + ' last verified ' + cur_game.last_verified);
           const new_runs = response.filter((run) => {
             return  Date.parse(run.status['verify-date']) > cur_game.last_verified;
           });
-      if(new_runs.length === 0) return;
+      if(new_runs.length === 0) {
+	      console.log('No new runs for '+cur_game.name);
+	      return;
+      }
       const run_func = (run) => announce_run(run, cur_game);
       new_runs.forEach((run) => srcom.isPB(run.id).then((x) => {if(x === true) announce_run(run,cur_game);}));
           const ver_dates = new_runs.map( x => Date.parse(x.status['verify-date']));
