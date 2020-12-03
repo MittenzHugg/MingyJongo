@@ -193,6 +193,7 @@ function log_mods(cur_game){
 }
 
 function check_awaiting_verification(cur_game){
+    console.log('Checking for new runs for ' + cur_game.name);
     srcom.getNewRuns(cur_game.id).then((new_runs)=>{    
         if(config.mode === 'final'){if(new_runs.length === 0) return;}
         srcom.getGameMods(cur_game.id).then((src_mods) => {
@@ -250,19 +251,21 @@ function check_awaiting_verification(cur_game){
 
 var mod_reminder = {};
 supportedGames.forEach((cur_game) => {
-    mod_reminder[cur_game.id] = schedule.scheduleJob('00 00 21 * * *', ()=>{check_awaiting_verification(cur_game);});
+    mod_reminder[cur_game.id] = check_awaiting_verification(cur_game);
 });
 
 
 function revertPBs(cur_game, n){
-    srcom.getVerifiedPBs(cur_game).then((runs) => {
+    srcom.getVerifiedRuns(cur_game.id).then((runs) => {
         cur_game.last_verified = Date.parse(runs[n].status['verify-date']);
-    console.log(cur_game.name, ' ', cur_game.last_verified);
+        fs.writeFileSync('./games.json', JSON.stringify(supportedGames, null, 2));
+        console.log(cur_game.name, ' ', cur_game.last_verified);
     });
 }
 
 
 function announce_run(run, cur_game, channel){
+    console.log('Announcing PB!');
     axios.get(run.links[0].uri,{ params:{embed: 'game,category,players'}})
         .then( (response) => {
             const game_data = response.data.data.game.data;
@@ -316,13 +319,17 @@ function announce_run(run, cur_game, channel){
 }
 
 function checkForPBs(){
+  console.log('Checking For PBs');
   supportedGames.forEach( (cur_game) => {
       var numberNewRuns = 0;  
       srcom.getVerifiedRuns(cur_game.id).then((response) => {
           const new_runs = response.filter((run) => {
             return  Date.parse(run.status['verify-date']) > cur_game.last_verified;
           });
-      if(new_runs.length === 0) return;
+      console.log(new_runs);
+      if(new_runs.length === 0) {
+         console.log('No new pbs for' + cur_game.name);
+      }return;
       const run_func = (run) => announce_run(run, cur_game);
       new_runs.forEach((run) => srcom.isPB(run.id).then((x) => {if(x === true) announce_run(run,cur_game);}));
           const ver_dates = new_runs.map( x => Date.parse(x.status['verify-date']));
@@ -340,15 +347,18 @@ if(!(config.mode === 'local'))
 
 if(!(config.mode === 'final'))
 process.stdin.on('data', (chunk) => {
-      const message = chunk.toString().trim() 
 
-      //seperate command from argument array
-      const args = message.split(/ +/g);
-      const command = args.shift().toLowerCase(); 
+    let arg_to_game = (arg) => {return supportedGames.find((game) => game.nickname === arg)};
+
+    const message = chunk.toString().trim() 
+
+    //seperate command from argument array
+    const args = message.split(/ +/g);
+    const command = args.shift().toLowerCase(); 
         
-      switch(command){
+    switch(command){
         case "ping":
-      console.log("Ping Recieved!");
+    console.log("Ping Recieved!");
           break;
     case "announce_pbs":
             supportedGames.forEach( (cur_game) => {
@@ -369,11 +379,10 @@ process.stdin.on('data', (chunk) => {
 
             break;
     case "revert_pbs":
-            const game_short = args.shift();
-        const rev_game = supportedGames.filter((x) => {return (x.nickname === game_short)});
-        if(rev_game.length > 0){
+        const rev_game = arg_to_game(args.shift());
+        if(rev_game != null){
                 let n = args.shift();
-                revertPBs(rev_game[0], n);
+                revertPBs(rev_game, n);
         }
             break;
         case "check_pbs":
