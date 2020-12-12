@@ -41,10 +41,126 @@ client.on('ready', () => {
             cur_game.last_verified = Date.parse(response[0].status['verify-date']);
             fs.writeFileSync('./games.json', JSON.stringify(supportedGames, null, 2));
             console.log(cur_game.name , cur_game.last_verified);
-	}).catch(console.error);
-	
+    }).catch(console.error);
+    
     });
 });
+
+let arg_to_game = (arg) => {return supportedGames.find((game) => game.nickname === arg)};
+
+const src_moderate = { 
+    cmds:{
+        "help":{
+            "method" : (mod,args) => src_moderate.print_help(),
+            "desc" : "I relay this message."
+        },
+        "ignore":{
+            "method" : (mod, args) => src_moderate.ignore(mod),
+            "desc" : "I will stop messaging you."
+        },
+        "remind":{
+            "method" : (mod, args) => src_moderate.remind(mod),
+            "desc" : "I will stop ignoring you."
+        },
+        "time":{
+            "method" : (mod, args) => src_moderate.set_time(mod, args),
+            "desc" : "Sets what time I will message you, or reminds you of the time I currently message you.",
+            "arg_desc" : "[<0-23>]"
+        }
+    },
+
+    set_time: function(mod_info, args){
+        if(!args.length){ 
+            return "Foolish bear, I always message you at " + mod_info.time  + ":00 UTC!";
+        } else {
+            var new_time = args.shift();
+            if(isNaN(new_time))
+                channel.send("Foolish bear, " + new_time + " is not a number!");
+            else{
+                new_time = ((new_time % 24) + 24) % 24;
+                mod_info.time = new_time;
+                fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
+                //TODO: reschedule any announcement jobs in progress to this mod
+                return "Bzzarrgh! I'll be back at " + new_time +":00 UTC";
+            }
+        }
+    },
+
+    ignore: function(mod_info){
+        mod_info.ignore = true;
+        fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
+        return "Bzzarrgh! I calculate my chances of reminding you are now minimal...";
+    },
+
+    remind: function(mod_info){
+        mod_info.ignore = false;
+        fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
+        return "Har-har-harrr! Foolish bear, you fell straight into my trap to spam your DMs!";
+    },
+
+    print_help: function(){
+        
+        var help_str = 'Har-har-harrr! Foolish bear, you fell straight into my trap! I\'m not that pathetic shaman you think I am! I\'m Mingy Jongo and your worthless quest to not moderate the banjo leaderboards ends here...\n\nOnce per day I check the leaderboards for new runs. If there are any waiting to be verified I message one moderator for the game. I rotate between moderators each time I send a message as to not over burden any one moderator with messages.\n\nBzzarrgh! Now that my elaborate disguise is ruined, here are some commands you can type here to help yourself against my evil cybotic-ness!:\n\t'; 
+        help_str += Object.entries(src_moderate.cmds).map((cmd)=>{
+            return '\`' + config.prefix + cmd[0] + ((cmd[1].arg_desc != null)? (' ' + cmd[1].arg_desc)  : '') + '\` : '+ cmd[1].desc;
+        }).join('\n\t');
+        return help_str + '\n\n As you see, there\'s no escape and resistance is futile!'
+    }
+}
+
+const discord_admin = {
+    cmds:{
+        "announce_pbs" : {
+            "method" : (args) => discord_admin.rev_runs(args),
+            "desc" : "rolls back *n* pb_announcements for specified game.",
+            "arg_desc" : "game_nickname <int>"
+        },
+        "check_pbs":{
+            "method" : (args) => checkForPBs(),
+            "desc" : ""
+        },
+        "game_nicknames":{
+            "method" : (args) => supportedGames.map((game) => "**" + game.nickname + "** : " + game.name).join('\n'),
+            "desc" : "Returns a list of game nicknames used in other commands."
+        },
+        "help":{
+            "method" : (args) => discord_admin.print_help(),
+            "desc" : "Displays this message."
+        },
+        "list_mods":{
+            "method" : (args) => {
+                const rev_game = arg_to_game(args.shift());
+                if(rev_game == null) 
+                    return "Unable to list mods for unknown game";
+                return Promise.all(log_mods(mod_game)).toString();
+            },
+            "desc" : "",
+            "arg_desc" : "game_nickname"
+        },
+        "ping":{
+            "method" : (args) => "pong!",
+            "desc" : "There\'s always someone better than you - Ping-Pong the Animation"
+        }
+    },
+
+    rev_runs: function(args){
+        const rev_game = arg_to_game(args.shift());
+        if(rev_game == null) 
+            return "Unable to revert unknown game";
+        let n = args.shift();
+        revertPBs(rev_game, n);
+        return '' + n + ' runs reverted for ' + rev_game.name;
+    },
+    
+    print_help: function(){    
+        var help_str = 'Har-har-harrr! Foolish bear, how will you stop me if you can\'t even remember a few simple commands?\n\t'; 
+        help_str +=  Object.entries(discord_admin.cmds).map((cmd)=>{
+            return '\`' + config.prefix + cmd[0] + ((cmd[1].arg_desc != null)? (' ' + cmd[1].arg_desc)  : '') + '\` : '+ cmd[1].desc;
+        }).join('\n\t');
+        return help_str;
+    }
+    
+}
 
 const prefix = config.prefix
 if(!(config.mode === 'local')){
@@ -53,96 +169,23 @@ client.on('message', (message) => {
    if(message.author.bot || !message.content.startsWith(prefix)) return;
   
    channel = message.channel;
-   
-   let arg_to_game = (arg) => {return supportedGames.find((game) => game.nickname === arg)};
 
    //seperate command from argument array
    const args = message.content.slice(prefix.length).trim().split(/ +/g);
    const command = args.shift().toLowerCase(); 
     
-   if(channel instanceof Discord.DMChannel){
-       var mod_info = leaderboard_mods.find((mod) => mod.discord_id === message.author.id);
-        if(mod_info != null){
-            switch(command){
-                case "time":
-                    if(!args.length){
-                        channel.send("Foolish bear, I always message you at " + mod_info.time  + ":00 UTC!");
-                    } else {
-                        var new_time = args.shift();
-                        if(isNaN(new_time))
-                            channel.send("Foolish bear, " + new_time + " is not a number!");
-                        else{
-                            new_time = ((new_time % 24) + 24) % 24;
-                            mod_info.time = new_time;
-			    fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-                            //TODO: reschedule any announcement jobs in progress to this mod
-                            channel.send("Bzzarrgh! I'll be back at " + new_time +":00 UTC");
-                        }
-                    }
-                    break;
-                case "ignore":
-                    mod_info.ignore = true;
-                    channel.send("Bzzarrgh! I calculate my chances of reminding you are now minimal...");
-                    fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-                    break;
-		case "remind":
-                    mod_info.ignore = false;
-                    channel.send("Har-har-harrr! Foolish bear, you fell straight into my trap to spam your DMs!");
-                    fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-		    break;
-		default:
-                    break;
-            }
+    if(channel instanceof Discord.DMChannel){
+        var mod_info = leaderboard_mods.find((mod) => mod.discord_id === message.author.id);
+        if(mod_info != null && src_moderate.cmd[command] != null){
+            console.log("!" + command + " command recieved from " +  mod_info.name);
+            channel.send(src_moderate.cmd[command].method(mod_info, args));
         }
-   }
-   else if(channel.name === 'admins' || channel.name === 'server_admin'){
-   if (message.member.roles.cache.find(r => r.name === 'Administrator')){
-
-      switch(command){
-        case "ping":
-      console.log("Ping Recieved!");
-          message.channel.send('pong!');
-          break;
-        case "announce_pb":
-            const rev_game = arg_to_game(args.shift());
-        if(rev_game == null) 
-            break;
-            let n = args.shift();
-            revertPBs(rev_game, n);
-        break;
-    case "test_bk_mod":
-          /*srcom.getGameMods('9dokge1p')
-          .then(function(mods){
-            var todaysMod = args.shift()%mods.length;
-            console.log(config.bk_mods.currMod);
-            todaysMod %= mods.length
-            srcom.getUserName(mods[todaysMod])
-            .then(function(username){
-              if(modsToMessage[username]){
-                  discord_user = client.users.get(modsToMessage[username]);
-              }
-              else{
-                  discord_user = client.users.find(r => r.username === username);
-                  modsToMessage[username] = discord_user.id;
-                  // ToDo : store modsToMessage in .json 
-              }
-              
-              if(discord_user){
-                message.channel.send("messaging " + username);
-                console.log(discord_user);
-//??? from here until ???END lines may have been inserted/deleted
-                discord_user.send('Bzzarrgh! Foolish bear, this is just a test of the verify runs DM system linking you to https://www.speedrun.com/runsawaitingverification');
-              }
-              else{
-                message.channel.send("Could not find discord user " + username);
-              }
-            });
-          });
-          */
-          break;
-        default:
-          break;
-      }
+    }
+    else if(channel.name === 'admins' || channel.name === 'server_admin'){
+        if (message.member.roles.cache.find(r => r.name === 'Administrator')){
+            if(discord_admin.cmds[command] != null){
+                channel.send(discord_admin.cmds[command].method(args));
+            }
     }
   }
 });
@@ -164,10 +207,10 @@ function get_mod_info(srcID){
             leaderboard_mods.push(mod_info);
             fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
             
-	    client.users.fetch(mod_info.discord_id).then((d_usr) => {
+            client.users.fetch(mod_info.discord_id).then((d_usr) => {
                 d_usr.send('Hello, '+ mod_info.name + '. Mumbo has big surprise for you.');
-		d_usr.send('Har-har-harrr! Foolish bear, you fell straight into my trap! I\'m not that pathetic shaman you think I am! I\'m Mingy Jongo and your worthless quest to not moderate the banjo leaderboards ends here...\n\nOnce per day I check the leaderboards for new runs. If there are any waiting to be verified I message one moderator for the game. I rotate between moderators each time I send a message as to not over burden any one moderator with messages.\n\nBzzarrgh! Now that my elaborate disguise is ruined, here are some commands you can type here to help yourself against my evil cybotic-ness!:\n\t\`!time\` I tell you what time I plan the message you.\n\t\`!time <0-23>\` Sets what time I will message you\n\t\`!ignore\` I will stop messaging you.\n\t\`!remind\` I will stop ignoring you.\n\n As you see, there\'s no escape and resistance is futile!');
-	    });
+                d_usr.send(src_moderate.print_help());
+            });
             
             return mod_info;
         });
@@ -308,13 +351,12 @@ function announce_run(run, cur_game, channel){
                     .setDescription(pb_msg.description)
                     .addField(`${plyr_name} got a ${timeStr} in ${cat_name}!`,pb_msg.field.description);
             if(config.mode === 'final'){
-            PBChan.send({embed})
+                PBChan.send({embed})
+            } else {
+                PBChan.send({embed}).then(rply => setTimeout(() => rply.delete(), 15*1000));
+            }
         }
-        else{
-            PBChan.send({embed}).then(rply => setTimeout(() => rply.delete(), 15*1000));
-        }
-        }
-        }).catch(console.error);    
+    }).catch(console.error);    
 }
 
 function checkForPBs(){
@@ -322,13 +364,13 @@ function checkForPBs(){
     supportedGames.forEach( (cur_game) => {
       var numberNewRuns = 0;  
       srcom.getVerifiedRuns(cur_game.id).then((response) => {
-	  console.log(cur_game.name + ' last verified ' + cur_game.last_verified);
+      console.log(cur_game.name + ' last verified ' + cur_game.last_verified);
           const new_runs = response.filter((run) => {
             return  Date.parse(run.status['verify-date']) > cur_game.last_verified;
           });
       if(new_runs.length === 0) {
-	      console.log('No new runs for '+cur_game.name);
-	      return;
+          console.log('No new runs for '+cur_game.name);
+          return;
       }
       const run_func = (run) => announce_run(run, cur_game);
       new_runs.forEach((run) => srcom.isPB(run.id).then((x) => {if(x === true) announce_run(run,cur_game);}));
@@ -352,49 +394,9 @@ process.stdin.on('data', (chunk) => {
       //seperate command from argument array
       const args = message.split(/ +/g);
       const command = args.shift().toLowerCase(); 
-        
-      switch(command){
-        case "ping":
-      console.log("Ping Recieved!");
-          break;
-    case "announce_pbs":
-            supportedGames.forEach( (cur_game) => {
-                console.log(cur_game.name);
-        srcom.getVerifiedRuns(cur_game.id)
-                .then((new_runs) => {
-                announce_run(new_runs[0], cur_game);
-                }).catch(console.error);
-        });
-            break;
-        case "list_mods":
-            const mod_short = args.shift();
-            const mod_game = supportedGames.find((x) => {return (x.nickname === mod_short)});
-        if(!(mod_game === undefined)){
-        log_mods(mod_game).then((x) => 
-                console.log(x));
-        }
-
-            break;
-    case "revert_pbs":
-            const game_short = args.shift();
-        const rev_game = supportedGames.filter((x) => {return (x.nickname === game_short)});
-        if(rev_game.length > 0){
-                let n = args.shift();
-                revertPBs(rev_game[0], n);
-        }
-            break;
-        case "check_pbs":
-            checkForPBs();
-            break;
-        case "check_new":   
-            const check_short = args.shift();
-        const check_game = supportedGames.find((x) => {return (x.nickname === check_short)});
-        if(check_game != null){ 
-        console.log(check_game);
-                check_awaiting_verification(check_game);
-        }
-    default:
-          break;
+    
+      if(discord_admin.cmds[command] != null){
+          console.log(discord_admin.cmds[command].method(args));
       }
 });
 
@@ -426,6 +428,7 @@ srcom = {
         .then((resp) => {return resp.data.data;});
     },
 
+    //Checks if the current run is a Personal Best for any of the runners
     isPB: function(runID){
         return speedrun_com.get('/runs/' + runID, {params:{}})
             .then((resp) => {
