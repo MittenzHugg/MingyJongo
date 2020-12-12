@@ -206,11 +206,12 @@ function get_mod_info(srcID){
             mod_info = {"name": src_info, "src_id":srcID, "discord_id":d_usr.id, "time":21, "ignore":false};
             leaderboard_mods.push(mod_info);
             fs.writeFileSync('./mods.json', JSON.stringify(leaderboard_mods, null, 2));
-            
-            client.users.fetch(mod_info.discord_id).then((d_usr) => {
-                d_usr.send('Hello, '+ mod_info.name + '. Mumbo has big surprise for you.');
-                d_usr.send(src_moderate.print_help());
-            });
+            if(config.mode === 'final'){
+                client.users.fetch(mod_info.discord_id).then((d_usr) => {
+                    d_usr.send('Hello, '+ mod_info.name + '. Mumbo has big surprise for you.');
+                    d_usr.send(src_moderate.print_help());
+                });
+            }
             
             return mod_info;
         });
