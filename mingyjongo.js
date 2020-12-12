@@ -111,34 +111,35 @@ const src_moderate = {
 const discord_admin = {
     cmds:{
         "announce_pbs" : {
-            "method" : (args) => discord_admin.rev_runs(args),
+            "method" : async (args) => discord_admin.rev_runs(args),
             "desc" : "rolls back *n* pb_announcements for specified game.",
             "arg_desc" : "game_nickname <int>"
         },
         "check_pbs":{
-            "method" : (args) => checkForPBs(),
+            "method" :async  (args) => checkForPBs(),
             "desc" : ""
         },
         "game_nicknames":{
-            "method" : (args) => supportedGames.map((game) => "**" + game.nickname + "** : " + game.name).join('\n'),
+            "method" : async (args) => supportedGames.map((game) => "**" + game.nickname + "** : " + game.name).join('\n'),
             "desc" : "Returns a list of game nicknames used in other commands."
         },
         "help":{
-            "method" : (args) => discord_admin.print_help(),
+            "method" : async (args) => discord_admin.print_help(),
             "desc" : "Displays this message."
         },
         "list_mods":{
-            "method" : (args) => {
-                const rev_game = arg_to_game(args.shift());
-                if(rev_game == null) 
+            "method" : async (args) => {
+                const mod_game = arg_to_game(args.shift());
+                if(mod_game == null) 
                     return "Unable to list mods for unknown game";
-                return Promise.all(log_mods(mod_game)).toString();
+                mods =  await log_mods(mod_game);
+		return mods.join('\n');
             },
             "desc" : "",
             "arg_desc" : "game_nickname"
         },
         "ping":{
-            "method" : (args) => "pong!",
+            "method" : async (args) => "pong!",
             "desc" : "There\'s always someone better than you - Ping-Pong the Animation"
         }
     },
@@ -176,15 +177,15 @@ client.on('message', (message) => {
     
     if(channel instanceof Discord.DMChannel){
         var mod_info = leaderboard_mods.find((mod) => mod.discord_id === message.author.id);
-        if(mod_info != null && src_moderate.cmd[command] != null){
+        if(mod_info != null && src_moderate.cmds[command] != null){
             console.log("!" + command + " command recieved from " +  mod_info.name);
-            channel.send(src_moderate.cmd[command].method(mod_info, args));
+            channel.send(src_moderate.cmds[command].method(mod_info, args));
         }
     }
     else if(channel.name === 'admins' || channel.name === 'server_admin'){
         if (message.member.roles.cache.find(r => r.name === 'Administrator')){
             if(discord_admin.cmds[command] != null){
-                channel.send(discord_admin.cmds[command].method(args));
+                discord_admin.cmds[command].method(args).then((x) => channel.send(x));
             }
     }
   }
@@ -397,7 +398,7 @@ process.stdin.on('data', (chunk) => {
       const command = args.shift().toLowerCase(); 
     
       if(discord_admin.cmds[command] != null){
-          console.log(discord_admin.cmds[command].method(args));
+          discord_admin.cmds[command].method(args).then((x)=>console.log(x));
       }
 });
 
