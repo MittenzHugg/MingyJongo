@@ -3,6 +3,9 @@ sensitive.json
 HEAD
 bk_mods.json
 config.json
+
+#prevent mods.json from updating and forgetting people on server repo
+mods.json 
 3eaf7ec06be47136be1b444c33ee82f697c04570
 
 #logs
