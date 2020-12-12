@@ -4,7 +4,8 @@ HEAD
 bk_mods.json
 config.json
 3eaf7ec06be47136be1b444c33ee82f697c04570
-
+games.json
+mods.json
 #logs
 logs
 *.log
