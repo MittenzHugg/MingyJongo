@@ -31,6 +31,33 @@
   },
   {
     "author":{
+      "name":"Lockup", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/7/79/Lockup.png"
+    },
+    "description":"This be a new PB!",
+    "field":{
+      "description":"Touch it if you dare..."
+    }
+  },
+  {
+    "author":{
+      "name":"Nabnut", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/97/Nabnut_icon.png"
+    },
+    "description":"chomp... munch... Nabnut likes PBs!",
+    "field":{
+      "description":"I'll see you in the spring for a rematch!"
+    }
+  },
+  {
+    "author":{
+      "name":"Blubber", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/0/01/Blubber%27s_Head_Icon.png"
+    },
+    "description":"Ahoy there! I'm cap'n Blubber, an' I lost me rank when ",
+    "field":{
+      "description":"Arr, take me spot, but I'm off to practice, practice, practice!"
+    }
+  },
+  {
+    "author":{
       "name":"Croctus", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/5/57/Croctus_Icon.png"
     },
     "description":"Yummy!",
@@ -42,21 +69,129 @@
     "author":{
       "name":"Boggy", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/f/f7/Boggy_icon.png"
     },
-    "description":"Take a look at this brand new PB!",
-    "field":{
-      "description":"It's got loads of features!"
-    }
-  },
-  {
-    "author":{
-      "name":"Boggy", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/f/f7/Boggy_icon.png"
-    },
     "description":"",
     "field":{
       "description":"You look faster already! Not sure how I can tell, but it's true!"
     }
   },
-    {
+  {
+    "author":{
+      "name":"Tumblar", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/1/1d/Tumblar_icon.png"
+    },
+    "description":"Greetings, O solid run!",
+    "field":{
+      "description":"Beat this time and you can take this infernal thing that's stuck under me!"
+    }
+  },
+  {
+    "author":{
+      "name":"Nipper", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/84/Nipper_icon.png"
+    },
+    "description":"Grrr...",
+    "field":{
+      "description":"Cheeky bird needs PB bopped!"
+    }
+  },
+  {
+    "author":{
+      "name":"Nipper", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/84/Nipper_icon.png"
+    },
+    "description":"Grrr...",
+    "field":{
+      "description":"Cheeky bird needs PB bopped!"
+    }
+  },
+  {
+    "author":{
+      "name":"Yellow Flibbit", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/d/d1/Y._Flibbits%27_Head_Icon.png"
+    },
+    "description":"They're back! Get them Flibbits",
+    "field":{
+      "description":"Blub... You're too fast for us Flibbits, take our leaderboard spot!"
+    }
+  },
+  {
+    "author":{
+      "name":"Zubba", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/a/a6/Zubba.png"
+    },
+    "description":"Bzzz... The speedrunner!",
+    "field":{
+      "description":"They're after Grunty's gold splits, sting them Zubbas!"
+    }
+  },
+  {
+    "author":{
+      "name":"Ancient One", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/2/29/Ancient_one_icon.png"
+    },
+    "description":"Summon all the hidden rings of the ancients to beat this PB!",
+    "field":{
+      "description":""
+    }
+  },
+  {
+    "author":{
+      "name":"Motzhand", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/98/Motzand_icon.png"
+    },
+    "description":"This PB is mighty fine!",
+    "field":{
+      "description":""
+    }
+  },
+  {
+    "author":{
+      "name":"Dingpot", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/c/ce/Dingpot.png"
+    },
+    "description":"Oooh! PBs for Dingpot... I like PBs!",
+    "field":{
+      "description":"Slposh on in and I'll fire you up to the top of the leaderboard!"
+    }
+  },
+  {
+    "author":{
+      "name":"Gnawty", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/0/02/Gnawty_icon.png"
+    },
+    "description":"Oh, here you are at last!",
+    "field":{
+      "description":"I've been waiting months to give you this PB!"
+    }
+  },
+  {
+    "author":{
+      "name":"Grabba", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/b/bd/Grabba_icon.png"
+    },
+    "description":"Noooo! I've had that time a thousand years.",
+    "field":{
+      "description":"Well done mortal!"
+    }
+  },
+  {
+    "author":{
+      "name":"Mr. Vile", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/7/7b/Mr_Vile_icon.png"
+    },
+    "description":"Grrr... greeny must have cheated!",
+    "field":{
+      "description":"Mr. Vile not acknowledging PB!"
+    }
+  },
+  {
+    "author":{
+      "name":"Warp Cauldron", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/2/22/WarpCauldronIcon.png"
+    },
+    "description":"You've activated a Magic PB!",
+    "field":{
+      "description":"Find two the same time to create a short cut to the top of the leaderboard!"
+    }
+  },
+  {
+    "author":{
+      "name":"Trunker", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/f/f0/Trunker_icon.png"
+    },
+    "description":"Ahhh... lovely PB!",
+    "field":{
+      "description":"Trunker feels great!"
+    }
+  },
+  {
     "author":{
       "name":"Gruntilda", "image":"https://i.imgur.com/IvxKcnN.png"
     },
@@ -68,7 +203,8 @@
   ]},
            
   "Banjo-Tooie":{
-  "data": [{
+  "data": [
+  {
     "author":{
       "name":"Mingy Jongo",
       "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/9a/Mingy-jongo.png"
@@ -78,6 +214,78 @@
       "description":"I calculate my chances of stopping them are now minimal..."
     }
   },
+  {
+    "author":{
+      "name":"Roysten", "image": "https://vignette.wikia.nocookie.net/banjokazooie/images/d/d1/Roysten_icon.png"
+    },
+    "description":"Please help me!",
+    "field":{
+      "description":"Because if I die, your PB will smell of dead fish."
+    }
+  },
+  {
+    "author":{
+      "name":"Biggafoot", "image": "https://vignette.wikia.nocookie.net/banjokazooie/images/1/1a/Biggafoot_icon.png"
+    },
+    "description":"If you try to steal my time, you'll be seeing my enormous foot close up!",
+    "field":{
+      "description":"OOO-OOO-AAAHHH! My poor PB!"
+    }
+  },
+  {
+    "author":{
+      "name":"Chief Bloatizan", "image": "https://vignette.wikia.nocookie.net/banjokazooie/images/3/3b/Bloatazin_icon.png"
+    },
+    "description":"It's Terrible! They beat Targitzan's favorite priceless PB!",
+    "field":{
+      "description":"Those thieving little..."
+    }
+  },
+  {
+    "author":{
+      "name":"Clinker", "image": "https://vignette.wikia.nocookie.net/banjokazooie/images/c/cd/Loudspeaker_Blinking.gif"
+    },
+    "description":"Alert! Intruders detected! Activate the tintops...",
+    "field":{
+      "description":"Ulp..Intruder has defeated the tintops. Grunty's treasure has been lost..."
+    }
+  }, 
+  {
+    "author":{
+      "name":"Weldar", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/80/Klungo_icon.png"
+    },
+    "description":"Ahem. I believe it states quite clearly in the worker's guidelines that bears are not to be let onto the leaderboard.",
+    "field":{
+      "description":"Oh well, looks like my welding days are over..."
+    }
+  }, 
+  {
+    "author":{
+      "name":"Captain Blackeye", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/5/5f/Captain-blackeye.png"
+    },
+    "description":"Shiver me timbers!",
+    "field":{
+      "description":"A bear stole me glory... looked a bit like you PB'd!"
+    }
+  },
+  {
+    "author":{
+      "name":"Lord Woo Fak Fak", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/93/Lord-woo-fak-fak.png"
+    },
+    "description":"Woo! Have you no sympathy beating a poor blind fish?",
+    "field":{
+      "description":"Curses! Things seem to have gone belly up!"
+    }
+  },
+  {
+    "author":{
+      "name":"Canary Mary", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/6/6c/Canary-mary.png"
+    },
+    "description":"Brawk! That was a fine run!",
+    "field":{
+      "description":"But my wings are still stiff from spending so long in that cage!"
+    }
+  }, 
   {
     "author":{
       "name":"Klungo", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/8/80/Klungo_icon.png"
@@ -95,7 +303,16 @@
     "field":{
       "description":"Waz I of azziztance? Bleep!"
     }
-  },    
+  }, 
+  {
+    "author":{
+      "name":"Boggy", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/f/f7/Boggy_icon.png"
+    },
+    "description":"Take a look at this brand new PB!",
+    "field":{
+      "description":"It's got loads of features!"
+    }
+  },   
   {
     "author":{
       "name":"Gobi", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/5/5a/Gobi_icon.png"
@@ -113,7 +330,16 @@
     "field":{
       "description":"That was a brand new PB - have you any idea how much they cost these days?!"
     }
-  }
+  },
+  {
+    "author":{
+      "name":"Chilly Willy", "image":"https://vignette.wikia.nocookie.net/banjokazooie/images/9/95/Chill-billi.png"
+    },
+    "description":"Ah... At last! The PB delivery bear!",
+    "field":{
+      "description": "I don't wanna compete against that... I'll go get McJiggy's instead."
+    }
+  } 
   ]},
   
    "Banjo-Kazooie: Grunty's Revenge":{
