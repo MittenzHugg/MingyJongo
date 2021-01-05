@@ -9,7 +9,7 @@
   "author": "Mittenz",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "discord.js": "^12.5.1",
     "moment": "^2.24.0",
     "node-fetch": "^2.6.1",
